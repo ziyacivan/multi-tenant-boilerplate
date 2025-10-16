@@ -1,0 +1,17 @@
+[project]
+name = "hrm-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.2.7",
+    "django-cors-headers>=4.9.0",
+    "django-extensions>=4.1",
+    "django-tenants>=3.9.0",
+    "djangorestframework>=3.16.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "drf-spectacular>=0.28.0",
+    "psycopg2>=2.9.11",
+    "python-dotenv>=1.1.1",
+]
