@@ -20,18 +20,25 @@ SHARED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "users",
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
     "drf_spectacular",
     "django_extensions",
+    "tenant_users.permissions",
+    "tenant_users.tenants",
 ]
 
 TENANT_APPS = [
-    "django.contrib.contenttypes",
     "django.contrib.admin",
     "django.contrib.auth",
-    "users",
+    "django.contrib.contenttypes",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "tenant_users.permissions",
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
@@ -48,6 +55,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "tenant_users.tenants.middleware.TenantAccessMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -161,3 +169,16 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+AUTHENTICATION_BACKENDS = ("tenant_users.permissions.backend.UserBackend",)
+
+TENANT_USERS_DOMAIN = "localhost"
+
+TENANT_USERS_PERMS_QUERYSET = (
+    "tenant_users.permissions.utils.get_optimized_tenant_perms_queryset"
+)
+
+if DEBUG:
+    SESSION_COOKIE_DOMAIN = None
+else:
+    SESSION_COOKIE_DOMAIN = ".domain.com"

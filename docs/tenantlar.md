@@ -36,6 +36,11 @@ domain.is_primary = True
 domain.save()
 ```
 
+### Bir müşterinin sistemi için superuser nasıl oluşturulur? (buradaki akış main app içinde geçerlidir)
+```py
+python manage.py create_tenant_superuser --username=admin --schema=public/customer-schema-name
+```
+
 ### Bir müşterinin sistemden kaldırılması nasıl yapılır?
 
 1. Mevcut yapımızla remote'den veritabanına bağlanarak ilgili schema'nın düşürülmesi yeterlidir fakat bu veri kaybına da yol açacaktır.
