@@ -134,9 +134,10 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S",
-    "DATE_FORMAT": "%Y-%m-%d",
 }
 
 SIMPLE_JWT = {
@@ -168,7 +169,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "HRM API",
     "DESCRIPTION": "Multi-tenant HRM Application API",
     "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_INCLUDE_SCHEMA": True,
 }
 
 AUTHENTICATION_BACKENDS = ("tenant_users.permissions.backend.UserBackend",)
