@@ -6,7 +6,7 @@ from tenants.exceptions import (
     CompanyAlreadyExistsException,
     UserAlreadyHaveCompanyException,
 )
-from tenants.models import Client
+from tenants.models import Client, Domain
 from users.choices import UserRole
 from users.models import User
 from utils.interfaces import BaseService
@@ -22,7 +22,7 @@ class ClientService(BaseService):
         if owner.role == UserRole.owner and owner.tenants.count() > 1:
             raise UserAlreadyHaveCompanyException()
 
-        tenant, _ = provision_tenant(
+        tenant, domain = provision_tenant(
             tenant_name=name,
             tenant_slug=slug,
             owner=owner,
@@ -31,6 +31,7 @@ class ClientService(BaseService):
         )
         tenant: Client = tenant
         tenant.description = description
+        tenant.domain_url = domain.domain
         tenant.save()
         return tenant
 
@@ -54,6 +55,10 @@ class ClientService(BaseService):
             instance.delete_tenant()
             instance.is_active = False
             instance.save()
+
+            domain = Domain.objects.get(tenant=instance)
+            domain.domain = instance.domain_url
+            domain.save()
 
         except DeleteError as e:
             raise APIException(detail=str(e))
