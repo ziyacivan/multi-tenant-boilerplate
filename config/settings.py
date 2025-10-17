@@ -174,6 +174,7 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Multi-tenant HRM Application API",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": True,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
 }
 
 AUTHENTICATION_BACKENDS = ("tenant_users.permissions.backend.UserBackend",)
