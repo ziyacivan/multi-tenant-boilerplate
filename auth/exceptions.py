@@ -36,3 +36,9 @@ class UserIsAlreadyInVerificationProcessException(exceptions.APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("User is already in verification process")
     default_code = "auth_006"
+
+
+class UserNotVerifiedException(exceptions.APIException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    default_detail = _("User is not verified")
+    default_code = "auth_007"

@@ -4,6 +4,12 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from rest_framework.routers import DefaultRouter
+
+from tenants.views import ClientViewSet
+
+public_router = DefaultRouter()
+public_router.register(r"clients", ClientViewSet)
 
 urlpatterns = [
     path(
@@ -23,6 +29,7 @@ urlpatterns = [
                     name="redoc",
                 ),
             ]
+            + public_router.urls
         ),
     )
 ]

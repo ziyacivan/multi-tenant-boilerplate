@@ -13,6 +13,7 @@ from auth.exceptions import (
     UserAlreadyVerifiedException,
     UserIsAlreadyInVerificationProcessException,
     UserNotActiveException,
+    UserNotVerifiedException,
 )
 from users.choices import UserRole
 from users.models import User
@@ -34,6 +35,9 @@ class AuthService:
 
         if not user_instance.check_password(password):
             raise InvalidCredentialsException()
+
+        if not user_instance.is_verified:
+            raise UserNotVerifiedException()
 
         refresh = RefreshToken.for_user(user_instance)
         return {
