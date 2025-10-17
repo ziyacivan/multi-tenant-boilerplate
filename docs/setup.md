@@ -50,6 +50,14 @@ user = User.objects.get(email="user@domain.com")
 User.objects.delete_user(user)
 ```
 
+### Tenant Bağlantısı Olmayan Kullanıcının Silinmesi
+```
+from users.models import User
+
+user = User.objects.get(email="user@domain.com")
+user.delete(force_drop=True)
+```
+
 ### Bir Tenant'a Yeni Bir Kullanıcı Eklenmesi
 ```py
 from tenants.models import Client

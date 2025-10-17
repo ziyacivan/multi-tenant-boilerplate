@@ -20,6 +20,18 @@ class User(BaseModel, UserProfile):
         choices=UserRole.choices,
         default=UserRole.employee,
     )
+    first_name = models.CharField(_("first name"), max_length=255, blank=True)
+    last_name = models.CharField(_("last name"), max_length=255, blank=True)
+
+    verification_code = models.CharField(
+        _("verification code"), max_length=255, blank=True
+    )
+    verification_code_expires_at = models.DateTimeField(
+        _("verification code expires at"), null=True, blank=True
+    )
+    verification_code_verified_at = models.DateTimeField(
+        _("verification code verified at"), null=True, blank=True
+    )
 
     class Meta:
         verbose_name = _("user")
