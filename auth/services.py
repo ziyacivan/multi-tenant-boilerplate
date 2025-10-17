@@ -14,6 +14,7 @@ from auth.exceptions import (
     UserIsAlreadyInVerificationProcessException,
     UserNotActiveException,
 )
+from users.choices import UserRole
 from users.models import User
 from utils.services import EmailService
 
@@ -61,6 +62,7 @@ class AuthService:
             first_name=first_name,
             last_name=last_name,
             is_staff=True,
+            role=UserRole.owner,
         )
         instance.verification_code = self.generate_verification_code()
         instance.verification_code_expires_at = timezone.now() + timezone.timedelta(
