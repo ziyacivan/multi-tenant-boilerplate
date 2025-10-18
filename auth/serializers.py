@@ -13,8 +13,6 @@ class RefreshTokenSerializer(serializers.Serializer):
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
 
 
 class RegisterResponseSerializer(serializers.Serializer):

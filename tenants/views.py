@@ -4,14 +4,13 @@ from rest_framework.permissions import IsAuthenticated
 from tenants.models import Client
 from tenants.serializers import ClientSerializer
 from tenants.services import ClientService
-from users.permissions import IsSystemUserOrOwner
 from utils.mixins import TenantRelatedMixin
 
 
 class ClientViewSet(TenantRelatedMixin, viewsets.ModelViewSet):
     queryset = Client.objects.all().order_by("-created_on")
     serializer_class = ClientSerializer
-    permission_classes = [IsAuthenticated, IsSystemUserOrOwner]
+    permission_classes = [IsAuthenticated]
     service_class = ClientService()
 
     def perform_create(self, serializer):
