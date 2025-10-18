@@ -7,7 +7,6 @@ from tenants.exceptions import (
     UserAlreadyHaveCompanyException,
 )
 from tenants.models import Client, Domain
-from users.choices import UserRole
 from users.models import User
 from utils.interfaces import BaseService
 
@@ -19,7 +18,7 @@ class ClientService(BaseService):
         if Client.objects.filter(slug=slug).exists():
             raise CompanyAlreadyExistsException()
 
-        if owner.role == UserRole.owner and owner.tenants.count() > 1:
+        if owner.tenants.count() > 1:
             raise UserAlreadyHaveCompanyException()
 
         tenant, domain = provision_tenant(

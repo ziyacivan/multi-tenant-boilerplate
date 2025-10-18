@@ -1,6 +1,5 @@
 import random
 import string
-from typing import Any
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -15,7 +14,6 @@ from auth.exceptions import (
     UserNotActiveException,
     UserNotVerifiedException,
 )
-from users.choices import UserRole
 from users.models import User
 from utils.services import EmailService
 
@@ -60,14 +58,7 @@ class AuthService:
         if user:
             raise UserAlreadyExistsException()
 
-        instance: User = User.objects.create_user(
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            is_staff=True,
-            role=UserRole.owner,
-        )
+        instance: User = User.objects.create_user(email=email, password=password)
         instance.verification_code = self.generate_verification_code()
         instance.verification_code_expires_at = timezone.now() + timezone.timedelta(
             minutes=15
