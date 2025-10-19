@@ -23,7 +23,7 @@ from auth.exceptions import (
     UserNotActiveException,
     UserNotVerifiedException,
 )
-from auth.tasks import send_verification_email_task
+from auth.tasks import send_reset_email_task, send_verification_email_task
 from tenants.models import Domain
 from users.models import User
 from utils.services import EmailService
@@ -183,7 +183,7 @@ class AuthService:
             f"{scheme}://{tenant_domain}:3000/reset-password/{uid}/{token}"
         )
 
-        self.email_service.send_reset_email(user, frontend_reset_url)
+        send_reset_email_task.delay(user.id, frontend_reset_url)
 
     def confirm_password_reset(
         self, uidb64: str, token: str, new_password: str
