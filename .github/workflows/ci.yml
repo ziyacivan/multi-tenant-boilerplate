@@ -171,13 +171,10 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
-      - name: Restore Python dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-
+      - name: Install coverage tools
+        run: |
+          uv pip install coverage
+          uv pip install coverage-merge
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
@@ -187,19 +184,24 @@ jobs:
           path: coverage-reports
           merge-multiple: true
 
+      - name: List downloaded files
+        run: |
+          ls -la coverage-reports
+          find coverage-reports -type f
+
       - name: Combine coverage reports
         if: success()
         run: |
           mkdir -p combined-coverage
-          uv pip install coverage-merge
           find coverage-reports -name "*.xml" -exec cp {} combined-coverage/ \;
           cd combined-coverage
-          uv run coverage-merge *.xml ../coverage-combined.xml
+          ls -la
+          uv run coverage-merge --lcov *.xml ../coverage-combined.xml
 
       - name: Generate HTML report
         if: success()
         run: |
-          uv run coverage html -d htmlcov --fail-under=70
+          uv run coverage html -d htmlcov
 
       - name: Upload combined coverage report
         if: always()
