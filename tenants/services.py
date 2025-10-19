@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework.exceptions import APIException
 from tenant_users.tenants.models import DeleteError
 from tenant_users.tenants.tasks import provision_tenant
@@ -45,13 +46,19 @@ class ClientService(BaseService):
         return instance
 
     def delete_object(self, instance: Client):
-        try:
+        with transaction.atomic():
             tenant_users = instance.user_set.all()
             for tenant_user in tenant_users:
                 tenant_user.is_active = False
             User.objects.bulk_update(tenant_users, ["is_active"])
 
-            instance.delete_tenant()
+            import time
+
+            time_string = str(int(time.time()))
+            new_domain_url = (
+                f"{time_string}-{instance.owner.pk!s}-{instance.domain_url}"
+            )
+            instance.domain_url = new_domain_url
             instance.is_active = False
             instance.save()
 
@@ -59,5 +66,20 @@ class ClientService(BaseService):
             domain.domain = instance.domain_url
             domain.save()
 
-        except DeleteError as e:
-            raise APIException(detail=str(e))
+    def active_client(self, instance: Client):
+        with transaction.atomic():
+            instance.is_active = True
+            instance.domain_url = instance.domain_url.split("-")[-1]
+            instance.save()
+
+            domain = Domain.objects.get(tenant=instance)
+            domain.domain = instance.domain_url
+            domain.save()
+
+            tenant_users = instance.user_set.all()
+            for tenant_user in tenant_users:
+                tenant_user.is_active = True
+
+            User.objects.bulk_update(tenant_users, ["is_active"])
+
+            return instance
