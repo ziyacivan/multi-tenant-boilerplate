@@ -12,7 +12,7 @@ HRM API projesi için otomatik test ve kod kalitesi kontrolü sağlayan bir CI/C
 
 ## Pipeline İşleri (Jobs)
 
-Pipeline iki ayrı iş içerir: **Formatting Check** ve **Tests & Coverage**
+Pipeline **paralel çalışan** işler içerir: **Formatting Check** ve **Modül Bazlı Test Jobs**
 
 ### 1. Code Formatting Check
 
@@ -30,24 +30,45 @@ isort --check-only --diff .
 
 **Başarısızlık Durumu:** Kod formatı kurallara uygun değilse pipeline başarısız olur.
 
-### 2. Tests & Coverage
+### 2. Modül Bazlı Test Jobs (Paralel)
 
-**Amaç:** Tüm Django testlerini çalıştırır ve minimum %80 kod kapsamı (coverage) oranını kontrol eder.
+**Amaç:** Her Django modülünü ayrı ayrı test eder ve modül bazlı coverage limitleri uygular.
+
+**Modüller ve Coverage Limitleri:**
+- **auth**: %85 (kritik güvenlik modülü)
+- **tenants**: %80 (çok kiracılı mimari)
+- **users**: %75 (temel kullanıcı yönetimi)
+- **employees**: %80 (iş süreçleri)
+- **utils**: %90 (yardımcı fonksiyonlar)
 
 **Servisler:**
-- PostgreSQL 15 (test veritabanı olarak)
+- Her job için ayrı PostgreSQL 15 container
 
-**Test Süreci:**
+**Test Süreci (Her Modül İçin):**
 1. PostgreSQL servisinin hazır olması beklenir
 2. Django test ortamı için `.env` dosyası oluşturulur
-3. Testler coverage ile çalıştırılır: `coverage run manage.py test --keepdb`
-4. Coverage raporu oluşturulur ve %80 minimum kontrol edilir
-5. XML formatında coverage raporu GitHub Actions artifacts'a yüklenir
-6. Pull request'lerde coverage raporu yorum olarak eklenir
+3. Sadece ilgili modül testleri çalıştırılır: `coverage run --source='MODULE' manage.py test MODULE --keepdb`
+4. Modül bazlı coverage raporu oluşturulur ve belirlenen minimum kontrol edilir
+5. Coverage raporu GitHub Actions artifacts'a yüklenir
+
+**Paralel Çalışma:**
+- Tüm test job'ları `formatting` job'ı tamamlandıktan sonra **paralel** olarak başlar
+- Her job farklı runner'da çalışır
+- Toplam pipeline süresi: en yavaş job'ın süresi
+
+### 3. Test Summary
+
+**Amaç:** Tüm modül coverage raporlarını birleştirir ve genel özet oluşturur.
+
+**Süreç:**
+1. Tüm modül coverage raporları indirilir
+2. Coverage raporları birleştirilir
+3. Genel coverage raporu oluşturulur
+4. Pull request'lerde coverage raporu yorum olarak eklenir
 
 **Başarısızlık Durumu:** 
-- Herhangi bir test başarısız olursa
-- Coverage oranı %80'in altına düşerse
+- Herhangi bir modül testi başarısız olursa
+- Herhangi bir modül coverage'ı belirlenen limitin altına düşerse
 
 ## Konfigürasyon
 
@@ -132,22 +153,43 @@ isort --check-only --diff .
 
 ### Testleri Coverage ile Çalıştırma
 
+#### Tüm Modülleri Test Etme
 ```bash
 # Dev dependencies'leri kur (coverage dahil)
 uv sync --extra dev
 
-# Testleri coverage ile çalıştır
+# Tüm testleri coverage ile çalıştır
 uv run coverage run manage.py test --keepdb
 
-# Coverage raporunu görüntüle
+# Genel coverage raporunu görüntüle
 uv run coverage report
-
-# Minimum coverage kontrolü (CI'daki gibi)
-uv run coverage report --fail-under=80
 
 # Detaylı HTML rapor oluştur
 uv run coverage html
 # Rapor: htmlcov/index.html
+```
+
+#### Modül Bazlı Test Etme (CI'daki gibi)
+```bash
+# Auth modülü (85% minimum)
+uv run coverage run --source='auth' manage.py test auth --keepdb
+uv run coverage report --fail-under=85
+
+# Tenants modülü (80% minimum)
+uv run coverage run --source='tenants' manage.py test tenants --keepdb
+uv run coverage report --fail-under=80
+
+# Users modülü (75% minimum)
+uv run coverage run --source='users' manage.py test users --keepdb
+uv run coverage report --fail-under=75
+
+# Employees modülü (80% minimum)
+uv run coverage run --source='employees' manage.py test employees --keepdb
+uv run coverage report --fail-under=80
+
+# Utils modülü (90% minimum)
+uv run coverage run --source='utils' manage.py test utils --keepdb
+uv run coverage report --fail-under=90
 ```
 
 ## Pipeline Sonuçlarını Görüntüleme

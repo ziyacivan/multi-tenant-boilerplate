@@ -12,7 +12,13 @@ Bu dizin, projenin GitHub Actions CI/CD pipeline'larını içerir.
 
 **İşler:**
 1. **Code Formatting Check** - Black ve isort ile kod formatı kontrolü
-2. **Tests & Coverage** - Django testleri ve %80 minimum coverage kontrolü
+2. **Modül Bazlı Test Jobs** (Paralel):
+   - **Test Auth Module** - Auth modülü testleri (%85 coverage)
+   - **Test Tenants Module** - Tenants modülü testleri (%80 coverage)
+   - **Test Users Module** - Users modülü testleri (%75 coverage)
+   - **Test Employees Module** - Employees modülü testleri (%80 coverage)
+   - **Test Utils Module** - Utils modülü testleri (%90 coverage)
+3. **Test Summary** - Tüm coverage raporlarını birleştirir
 
 **Detaylı bilgi:** [CI Pipeline Dokümantasyonu](../../docs/ci-pipeline.md)
 
@@ -35,9 +41,18 @@ isort .
 black --check --diff .
 isort --check-only --diff .
 
-# Testler ve coverage
+# Tüm testler ve genel coverage
 uv run coverage run manage.py test --keepdb
+uv run coverage report
+
+# Modül bazlı testler (CI'daki gibi)
+uv run coverage run --source='auth' manage.py test auth --keepdb
+uv run coverage report --fail-under=85
+
+uv run coverage run --source='tenants' manage.py test tenants --keepdb
 uv run coverage report --fail-under=80
+
+# ... diğer modüller için benzer şekilde
 ```
 
 ## Sorun Giderme
