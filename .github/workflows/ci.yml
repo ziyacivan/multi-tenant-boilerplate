@@ -184,18 +184,21 @@ jobs:
 
       - name: List downloaded files
         run: |
+          ls -la
           ls -la coverage-reports
-          find coverage-reports -type f
+          find coverage-reports -name "*.xml" -type f
 
       - name: Combine coverage reports
         if: success()
         run: |
           mkdir -p combined-coverage
-          cp coverage-reports/*/*.xml combined-coverage/
+          find coverage-reports -name "*.xml" -type f -exec cp {} combined-coverage/ \;
           cd combined-coverage
           ls -la
           uv run coverage combine *.xml
-          uv run coverage xml -o ../coverage-combined.xml
+          uv run coverage xml -o coverage-combined.xml
+          cd ..
+          ls -la coverage-combined.xml
 
       - name: Generate HTML report
         if: success()
