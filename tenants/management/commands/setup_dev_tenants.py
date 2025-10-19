@@ -1,6 +1,7 @@
 import os
 
 from django.core.management.base import BaseCommand
+
 from django_tenants.utils import tenant_context
 from tenant_users.tenants.tasks import provision_tenant
 from tenant_users.tenants.utils import create_public_tenant

@@ -3,6 +3,7 @@ import string
 
 from django.db.models import QuerySet
 from django.utils import timezone
+
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from auth.exceptions import (

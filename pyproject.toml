@@ -19,3 +19,60 @@ dependencies = [
     "python-dotenv>=1.1.1",
     "sendgrid>=6.12.5",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "coverage>=7.0.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py313']
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | \.uv
+  | __pycache__
+  | migrations
+  | staticfiles
+  | mediafiles
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip_glob = ["*/migrations/*", "staticfiles/*", "mediafiles/*"]
+known_django = ["django"]
+known_first_party = ["auth", "config", "employees", "tenants", "users", "utils"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "manage.py",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/.uv/*",
+    "config/wsgi.py",
+    "config/asgi.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

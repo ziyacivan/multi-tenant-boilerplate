@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from django.urls import reverse
 from django.utils import timezone
+
 from django_tenants.test.cases import TenantTestCase
 from django_tenants.test.client import TenantClient
 from model_bakery import baker

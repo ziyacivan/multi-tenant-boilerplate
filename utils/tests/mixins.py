@@ -2,6 +2,7 @@ from typing import Type
 
 from django.contrib.auth import get_user_model
 from django.db import connection
+
 from django_tenants.utils import (
     get_public_schema_name,
     get_tenant_domain_model,
