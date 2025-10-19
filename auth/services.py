@@ -23,6 +23,7 @@ from auth.exceptions import (
     UserNotActiveException,
     UserNotVerifiedException,
 )
+from auth.tasks import send_verification_email_task
 from tenants.models import Domain
 from users.models import User
 from utils.services import EmailService
@@ -88,10 +89,8 @@ class AuthService:
         instance.is_verified = False
         instance.save()
 
-        self.email_service.send_verification_email(
-            email=email,
-            verification_code=instance.verification_code,
-            expires_at=instance.verification_code_expires_at,
+        send_verification_email_task.delay(
+            email, instance.verification_code, instance.verification_code_expires_at
         )
         return True
 
@@ -147,10 +146,8 @@ class AuthService:
             minutes=15
         )
         user.save()
-        self.email_service.send_verification_email(
-            email=email,
-            verification_code=user.verification_code,
-            expires_at=user.verification_code_expires_at,
+        send_verification_email_task.delay(
+            email, user.verification_code, user.verification_code_expires_at
         )
         return True
 
