@@ -143,6 +143,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.ScopedRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {"auth-register": "5/hour"},
+    "EXCEPTION_HANDLER": "utils.exceptions.custom_exception_handler",
 }
 
 SIMPLE_JWT = {
