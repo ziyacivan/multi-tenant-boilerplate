@@ -172,10 +172,13 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
-      # Install only the necessary tools for this job
-      - name: Install coverage tools
-        run: |
-          uv pip install coverage[toml]
+      - name: Restore Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
