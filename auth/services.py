@@ -51,11 +51,15 @@ class AuthService:
             "access": str(refresh.access_token),
         }
 
-    def register(
-        self, email: str, password: str, first_name: str, last_name: str
-    ) -> bool:
-        user = User.objects.filter(email=email).exists()
+    def register(self, email: str, password: str) -> bool:
+        user: User | None = User.objects.filter(email=email).first()
         if user:
+            if user.is_verified is False:
+                raise UserIsAlreadyInVerificationProcessException(
+                    verification_code_expires_at=user.verification_code_expires_at,
+                    is_verified=user.is_verified,
+                )
+
             raise UserAlreadyExistsException()
 
         instance: User = User.objects.create_user(email=email, password=password)
