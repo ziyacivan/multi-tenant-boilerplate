@@ -1,3 +1,5 @@
+from django.utils.translation import gettext as _
+
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, views
 from rest_framework.permissions import AllowAny
@@ -6,6 +8,8 @@ from rest_framework.response import Response
 
 from auth.serializers import (
     LoginSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
     RefreshTokenSerializer,
     RegisterSerializer,
     ResendVerificationEmailSerializer,
@@ -177,3 +181,77 @@ class ResendVerificationEmailView(views.APIView):
         serializer.is_valid(raise_exception=True)
         self.service_class.resend_verification_email(**serializer.validated_data)
         return Response(status=status.HTTP_200_OK)
+
+
+class PasswordResetRequestView(views.APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = []  # TODO: Implement throttling
+    service_class = AuthService()
+
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: {
+                "type": "object",
+                "properties": {
+                    "detail": {"type": "string"},
+                },
+            },
+        },
+        request=PasswordResetRequestSerializer,
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+
+        if serializer.is_valid():
+            email = serializer.validated_data["email"]
+            self.service_class.request_password_reset(email, request)
+
+        return Response(
+            {
+                "detail": _(
+                    "If an account with that email exists, a password reset link has been sent."
+                )
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(views.APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = []  # TODO: Implement throttling
+    service_class = AuthService()
+
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: {
+                "type": "object",
+                "properties": {
+                    "detail": {"type": "string"},
+                },
+            },
+            status.HTTP_400_BAD_REQUEST: {
+                "type": "object",
+                "properties": {
+                    "detail": {"type": "string"},
+                },
+            },
+        },
+        request=PasswordResetConfirmSerializer,
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        uidb64 = serializer.validated_data["uid"]
+        token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["new_password1"]
+
+        success, message = self.service_class.confirm_password_reset(
+            uidb64, token, new_password
+        )
+
+        if success:
+            return Response({"detail": message}, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
