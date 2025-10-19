@@ -1,3 +1,7 @@
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import serializers
 
 
@@ -33,3 +37,29 @@ class VerifyEmailResponseSerializer(serializers.Serializer):
 
 class ResendVerificationEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField(required=True)
+    token = serializers.CharField(required=True)
+    new_password1 = serializers.CharField(
+        required=True, write_only=True, style={"input_type": "password"}
+    )
+    new_password2 = serializers.CharField(
+        required=True, write_only=True, style={"input_type": "password"}
+    )
+
+    def validate(self, data):
+        if data["new_password1"] != data["new_password2"]:
+            raise serializers.ValidationError(_("Passwords do not match."))
+
+        try:
+            validate_password(data["new_password1"])
+        except ValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+
+        return data
