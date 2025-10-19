@@ -41,7 +41,7 @@ jobs:
 
   # Test jobs using matrix strategy - more efficient
   test-modules:
-    name: Test ${{ matrix.module }} Module
+    name: Test ${{ matrix.module }} module
     runs-on: ubuntu-latest
     needs: formatting
     strategy:
@@ -152,14 +152,9 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          enable-cache: true
-
       - name: Install coverage
         run: |
-          uv pip install --system coverage>=7.0.0
+          pip install coverage>=7.0.0
 
       - name: Combine coverage reports
         run: |
