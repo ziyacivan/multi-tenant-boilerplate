@@ -36,7 +36,7 @@ black --check --diff .
 isort --check-only --diff .
 
 # Testler ve coverage
-uv run coverage run --source='.' manage.py test --keepdb
+uv run coverage run manage.py test --keepdb
 uv run coverage report --fail-under=80
 ```
 

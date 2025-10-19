@@ -133,11 +133,17 @@ isort --check-only --diff .
 ### Testleri Coverage ile Çalıştırma
 
 ```bash
+# Dev dependencies'leri kur (coverage dahil)
+uv sync --extra dev
+
 # Testleri coverage ile çalıştır
-uv run coverage run --source='.' manage.py test --keepdb
+uv run coverage run manage.py test --keepdb
 
 # Coverage raporunu görüntüle
 uv run coverage report
+
+# Minimum coverage kontrolü (CI'daki gibi)
+uv run coverage report --fail-under=80
 
 # Detaylı HTML rapor oluştur
 uv run coverage html
