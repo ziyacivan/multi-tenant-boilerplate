@@ -185,19 +185,23 @@ jobs:
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
+        id: download-reports
         with:
           path: coverage-reports
           pattern: coverage-report-*
           merge-multiple: true
 
       - name: List downloaded files
+        if: steps.download-reports.outputs.download-path
         run: ls -R coverage-reports
 
       - name: Combine coverage reports
+        if: steps.download-reports.outputs.download-path
         run: |
           uv run coverage combine coverage-reports
 
       - name: Generate total coverage report
+        if: steps.download-reports.outputs.download-path
         id: coverage-comment
         uses: py-cov-action/python-coverage-comment-action@v3.38
         with:
