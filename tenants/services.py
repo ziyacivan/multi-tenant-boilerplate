@@ -14,7 +14,21 @@ from utils.interfaces import BaseService
 
 class ClientService(BaseService):
     def create_object(
-        self, name: str, description: str, slug: str, owner: User
+        self,
+        name: str,
+        description: str,
+        slug: str,
+        owner: User,
+        legal_name: str,
+        tax_no: str,
+        tax_office: str,
+        address: str,
+        invoice_address: str,
+        city: str,
+        country: str,
+        invoice_email_address: str,
+        short_name: str,
+        **kwargs: dict,
     ) -> Client:
         if Client.objects.filter(slug=slug).exists():
             raise CompanyAlreadyExistsException()
@@ -32,6 +46,15 @@ class ClientService(BaseService):
         tenant: Client = tenant
         tenant.description = description
         tenant.domain_url = domain.domain
+        tenant.legal_name = legal_name
+        tenant.tax_no = tax_no
+        tenant.tax_office = tax_office
+        tenant.address = address
+        tenant.invoice_address = invoice_address
+        tenant.city = city
+        tenant.country = country
+        tenant.invoice_email_address = invoice_email_address
+        tenant.short_name = short_name
         tenant.save()
         return tenant
 
