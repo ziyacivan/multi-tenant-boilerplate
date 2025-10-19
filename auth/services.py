@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from auth.exceptions import (
     InvalidCredentialsException,
+    InvalidTokenException,
     InvalidVerificationCodeException,
     UserAlreadyExistsException,
     UserAlreadyVerifiedException,
@@ -45,11 +46,14 @@ class AuthService:
 
     @staticmethod
     def refresh_token(refresh_token: str) -> dict[str, str]:
-        refresh = RefreshToken(refresh_token)
-        return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        }
+        try:
+            refresh = RefreshToken(refresh_token)
+            return {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }
+        except Exception as e:
+            raise InvalidTokenException() from e
 
     def register(self, email: str, password: str) -> bool:
         user: User | None = User.objects.filter(email=email).first()
@@ -61,6 +65,10 @@ class AuthService:
                 )
 
             raise UserAlreadyExistsException()
+
+        from django.db import connection
+
+        connection.set_schema_to_public()
 
         instance: User = User.objects.create_user(email=email, password=password)
         instance.verification_code = self.generate_verification_code()

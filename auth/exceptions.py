@@ -47,3 +47,9 @@ class UserNotVerifiedException(BaseAPIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("User is not verified")
     default_code = "auth_007"
+
+
+class InvalidTokenException(BaseAPIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("Invalid token")
+    default_code = "auth_008"
