@@ -7,30 +7,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0001_initial'),
+        ("users", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='user',
-            options={'verbose_name': 'user', 'verbose_name_plural': 'users'},
+            name="user",
+            options={"verbose_name": "user", "verbose_name_plural": "users"},
         ),
         migrations.AddField(
-            model_name='user',
-            name='created_on',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now, verbose_name='created on'),
+            model_name="user",
+            name="created_on",
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=django.utils.timezone.now,
+                verbose_name="created on",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='user',
-            name='updated_on',
-            field=models.DateTimeField(auto_now=True, verbose_name='updated on'),
+            model_name="user",
+            name="updated_on",
+            field=models.DateTimeField(auto_now=True, verbose_name="updated on"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='manager',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='manager'),
+            model_name="user",
+            name="manager",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="manager",
+            ),
         ),
     ]

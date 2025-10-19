@@ -13,6 +13,6 @@ class CompanyAlreadyExistsException(APIException):
 class UserAlreadyHaveCompanyException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _(
-        "You have a relation with a company. " "You cannot create a new company."
+        "You have a relation with a company. You cannot create a new company."
     )
     default_code = "companies_002"

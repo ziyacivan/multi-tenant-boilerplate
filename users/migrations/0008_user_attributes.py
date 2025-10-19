@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0007_remove_user_first_name_remove_user_last_name_and_more'),
+        ("users", "0007_remove_user_first_name_remove_user_last_name_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='attributes',
-            field=models.JSONField(blank=True, default=dict, verbose_name='attributes'),
+            model_name="user",
+            name="attributes",
+            field=models.JSONField(blank=True, default=dict, verbose_name="attributes"),
         ),
     ]

@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,28 +14,122 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Employee',
+            name="Employee",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True, verbose_name='created on')),
-                ('updated_on', models.DateTimeField(auto_now=True, verbose_name='updated on')),
-                ('first_name', models.CharField(max_length=255, verbose_name='first name')),
-                ('last_name', models.CharField(max_length=255, verbose_name='last name')),
-                ('photo', models.ImageField(blank=True, null=True, upload_to='employees/photos/', verbose_name='photo')),
-                ('role', models.CharField(choices=[('owner', 'Owner'), ('manager', 'Manager'), ('employee', 'Employee')], default='employee', max_length=20, verbose_name='role')),
-                ('employment_date', models.DateField(blank=True, null=True, verbose_name='employment date')),
-                ('termination_date', models.DateField(blank=True, null=True, verbose_name='termination date')),
-                ('identification_number', models.CharField(blank=True, max_length=255, verbose_name='identification number')),
-                ('contract_type', models.CharField(choices=[('indefinite', 'Indefinite'), ('limited', 'Limited')], default='indefinite', max_length=20, verbose_name='contract type')),
-                ('contract_end_date', models.DateField(blank=True, null=True, verbose_name='contract end date')),
-                ('phone_number', models.CharField(blank=True, max_length=255, verbose_name='phone number')),
-                ('business_phone_number', models.CharField(blank=True, max_length=255, verbose_name='business phone number')),
-                ('manager', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='employees.employee', verbose_name='manager')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_on",
+                    models.DateTimeField(auto_now_add=True, verbose_name="created on"),
+                ),
+                (
+                    "updated_on",
+                    models.DateTimeField(auto_now=True, verbose_name="updated on"),
+                ),
+                (
+                    "first_name",
+                    models.CharField(max_length=255, verbose_name="first name"),
+                ),
+                (
+                    "last_name",
+                    models.CharField(max_length=255, verbose_name="last name"),
+                ),
+                (
+                    "photo",
+                    models.ImageField(
+                        blank=True,
+                        null=True,
+                        upload_to="employees/photos/",
+                        verbose_name="photo",
+                    ),
+                ),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[
+                            ("owner", "Owner"),
+                            ("manager", "Manager"),
+                            ("employee", "Employee"),
+                        ],
+                        default="employee",
+                        max_length=20,
+                        verbose_name="role",
+                    ),
+                ),
+                (
+                    "employment_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="employment date"
+                    ),
+                ),
+                (
+                    "termination_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="termination date"
+                    ),
+                ),
+                (
+                    "identification_number",
+                    models.CharField(
+                        blank=True, max_length=255, verbose_name="identification number"
+                    ),
+                ),
+                (
+                    "contract_type",
+                    models.CharField(
+                        choices=[("indefinite", "Indefinite"), ("limited", "Limited")],
+                        default="indefinite",
+                        max_length=20,
+                        verbose_name="contract type",
+                    ),
+                ),
+                (
+                    "contract_end_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="contract end date"
+                    ),
+                ),
+                (
+                    "phone_number",
+                    models.CharField(
+                        blank=True, max_length=255, verbose_name="phone number"
+                    ),
+                ),
+                (
+                    "business_phone_number",
+                    models.CharField(
+                        blank=True, max_length=255, verbose_name="business phone number"
+                    ),
+                ),
+                (
+                    "manager",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="employees.employee",
+                        verbose_name="manager",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="user",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'employee',
-                'verbose_name_plural': 'employees',
+                "verbose_name": "employee",
+                "verbose_name_plural": "employees",
             },
         ),
     ]

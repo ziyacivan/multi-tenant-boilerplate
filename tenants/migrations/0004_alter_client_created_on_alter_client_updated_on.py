@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tenants', '0003_alter_client_description_alter_client_is_active_and_more'),
+        ("tenants", "0003_alter_client_description_alter_client_is_active_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='client',
-            name='created_on',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='created on'),
+            model_name="client",
+            name="created_on",
+            field=models.DateTimeField(auto_now_add=True, verbose_name="created on"),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='updated_on',
-            field=models.DateTimeField(auto_now=True, verbose_name='updated on'),
+            model_name="client",
+            name="updated_on",
+            field=models.DateTimeField(auto_now=True, verbose_name="updated on"),
         ),
     ]

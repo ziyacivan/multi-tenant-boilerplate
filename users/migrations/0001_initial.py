@@ -7,29 +7,72 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('tenants', '0001_initial'),
+        ("tenants", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('email', models.EmailField(db_index=True, max_length=254, unique=True, verbose_name='Email Address')),
-                ('is_active', models.BooleanField(default=True, verbose_name='active')),
-                ('is_verified', models.BooleanField(default=False, verbose_name='verified')),
-                ('manager', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('tenants', models.ManyToManyField(blank=True, help_text='The tenants this user belongs to.', related_name='user_set', to='tenants.client', verbose_name='tenants')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        db_index=True,
+                        max_length=254,
+                        unique=True,
+                        verbose_name="Email Address",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="active")),
+                (
+                    "is_verified",
+                    models.BooleanField(default=False, verbose_name="verified"),
+                ),
+                (
+                    "manager",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "tenants",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="The tenants this user belongs to.",
+                        related_name="user_set",
+                        to="tenants.client",
+                        verbose_name="tenants",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=(models.Model, tenant_users.permissions.models.PermissionsMixinFacade),
+            bases=(
+                models.Model,
+                tenant_users.permissions.models.PermissionsMixinFacade,
+            ),
         ),
     ]

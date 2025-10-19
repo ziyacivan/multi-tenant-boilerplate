@@ -4,25 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0005_user_first_name_user_last_name'),
+        ("users", "0005_user_first_name_user_last_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='verification_code',
-            field=models.CharField(blank=True, max_length=255, verbose_name='verification code'),
+            model_name="user",
+            name="verification_code",
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name="verification code"
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='verification_code_expires_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='verification code expires at'),
+            model_name="user",
+            name="verification_code_expires_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="verification code expires at"
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='verification_code_verified_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='verification code verified at'),
+            model_name="user",
+            name="verification_code_verified_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="verification code verified at"
+            ),
         ),
     ]

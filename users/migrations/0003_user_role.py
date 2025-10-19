@@ -4,15 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0002_alter_user_options_user_created_on_user_updated_on_and_more'),
+        ("users", "0002_alter_user_options_user_created_on_user_updated_on_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='role',
-            field=models.CharField(choices=[('owner', 'Owner'), ('manager', 'Manager'), ('employee', 'Employee')], default='employee', max_length=20, verbose_name='role'),
+            model_name="user",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("owner", "Owner"),
+                    ("manager", "Manager"),
+                    ("employee", "Employee"),
+                ],
+                default="employee",
+                max_length=20,
+                verbose_name="role",
+            ),
         ),
     ]

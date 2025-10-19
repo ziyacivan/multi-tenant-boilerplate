@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tenants', '0002_initial'),
+        ("tenants", "0002_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='client',
-            name='description',
-            field=models.TextField(blank=True, verbose_name='description'),
+            model_name="client",
+            name="description",
+            field=models.TextField(blank=True, verbose_name="description"),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='is_active',
-            field=models.BooleanField(default=True, verbose_name='is active'),
+            model_name="client",
+            name="is_active",
+            field=models.BooleanField(default=True, verbose_name="is active"),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='name',
-            field=models.CharField(max_length=255, verbose_name='name'),
+            model_name="client",
+            name="name",
+            field=models.CharField(max_length=255, verbose_name="name"),
         ),
     ]

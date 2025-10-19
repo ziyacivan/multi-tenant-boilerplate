@@ -4,55 +4,64 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tenants', '0005_client_attributes'),
+        ("tenants", "0005_client_attributes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='client',
-            name='address',
-            field=models.TextField(blank=True, verbose_name='address'),
+            model_name="client",
+            name="address",
+            field=models.TextField(blank=True, verbose_name="address"),
         ),
         migrations.AddField(
-            model_name='client',
-            name='city',
-            field=models.CharField(blank=True, max_length=255, verbose_name='city'),
+            model_name="client",
+            name="city",
+            field=models.CharField(blank=True, max_length=255, verbose_name="city"),
         ),
         migrations.AddField(
-            model_name='client',
-            name='country',
-            field=models.CharField(blank=True, max_length=255, verbose_name='country'),
+            model_name="client",
+            name="country",
+            field=models.CharField(blank=True, max_length=255, verbose_name="country"),
         ),
         migrations.AddField(
-            model_name='client',
-            name='invoice_address',
-            field=models.TextField(blank=True, verbose_name='invoice address'),
+            model_name="client",
+            name="invoice_address",
+            field=models.TextField(blank=True, verbose_name="invoice address"),
         ),
         migrations.AddField(
-            model_name='client',
-            name='invoice_email_address',
-            field=models.EmailField(blank=True, max_length=254, verbose_name='invoice email address'),
+            model_name="client",
+            name="invoice_email_address",
+            field=models.EmailField(
+                blank=True, max_length=254, verbose_name="invoice email address"
+            ),
         ),
         migrations.AddField(
-            model_name='client',
-            name='legal_name',
-            field=models.CharField(blank=True, max_length=255, verbose_name='legal name'),
+            model_name="client",
+            name="legal_name",
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name="legal name"
+            ),
         ),
         migrations.AddField(
-            model_name='client',
-            name='short_name',
-            field=models.CharField(blank=True, max_length=255, verbose_name='short name'),
+            model_name="client",
+            name="short_name",
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name="short name"
+            ),
         ),
         migrations.AddField(
-            model_name='client',
-            name='tax_no',
-            field=models.CharField(blank=True, max_length=255, verbose_name='tax number'),
+            model_name="client",
+            name="tax_no",
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name="tax number"
+            ),
         ),
         migrations.AddField(
-            model_name='client',
-            name='tax_office',
-            field=models.CharField(blank=True, max_length=255, verbose_name='tax office'),
+            model_name="client",
+            name="tax_office",
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name="tax office"
+            ),
         ),
     ]

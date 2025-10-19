@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tenants', '0004_alter_client_created_on_alter_client_updated_on'),
+        ("tenants", "0004_alter_client_created_on_alter_client_updated_on"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='client',
-            name='attributes',
-            field=models.JSONField(blank=True, default=dict, verbose_name='attributes'),
+            model_name="client",
+            name="attributes",
+            field=models.JSONField(blank=True, default=dict, verbose_name="attributes"),
         ),
     ]

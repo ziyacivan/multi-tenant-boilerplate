@@ -4,26 +4,25 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0006_user_verification_code_and_more'),
+        ("users", "0006_user_verification_code_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='first_name',
+            model_name="user",
+            name="first_name",
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='last_name',
+            model_name="user",
+            name="last_name",
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='manager',
+            model_name="user",
+            name="manager",
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='role',
+            model_name="user",
+            name="role",
         ),
     ]
