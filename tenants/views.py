@@ -8,7 +8,7 @@ from utils.mixins import TenantRelatedMixin
 
 
 class ClientViewSet(TenantRelatedMixin, viewsets.ModelViewSet):
-    queryset = Client.objects.all().order_by("-created_on")
+    queryset = Client.objects.filter(is_active=True).order_by("-created_on")
     serializer_class = ClientSerializer
     permission_classes = [IsAuthenticated]
     service_class = ClientService()
