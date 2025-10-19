@@ -171,13 +171,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
-      - name: Create and activate virtual environment
-        run: uv venv
-
-      - name: Install coverage tools
-        run: |
-          uv pip install --system coverage
-          uv pip install --system coverage-merge
+      - name: Install coverage
+        run: uv pip install --system coverage
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
@@ -196,10 +191,11 @@ jobs:
         if: success()
         run: |
           mkdir -p combined-coverage
-          find coverage-reports -name "*.xml" -exec cp {} combined-coverage/ \;
+          cp coverage-reports/*/*.xml combined-coverage/
           cd combined-coverage
           ls -la
-          uv run coverage-merge --lcov *.xml ../coverage-combined.xml
+          uv run coverage combine *.xml
+          uv run coverage xml -o ../coverage-combined.xml
 
       - name: Generate HTML report
         if: success()
