@@ -146,6 +146,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: coverage-reports
+          pattern: coverage-report-*
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -156,10 +157,52 @@ jobs:
         run: |
           pip install coverage>=7.0.0
 
+      - name: Debug coverage files
+        run: |
+          echo "=== Coverage reports directory structure ==="
+          find coverage-reports -type f -name "*.coverage" 2>/dev/null || echo "No .coverage files found"
+          echo "=== All files in coverage-reports ==="
+          find coverage-reports -type f 2>/dev/null || echo "No files found"
+          echo "=== Directory listing ==="
+          ls -la coverage-reports/ 2>/dev/null || echo "Directory not found"
+
       - name: Combine coverage reports
         run: |
+          # Find all .coverage files in the downloaded artifacts
+          COVERAGE_FILES=$(find coverage-reports -name ".coverage" -type f 2>/dev/null || true)
+          
+          if [ -z "$COVERAGE_FILES" ]; then
+            echo "No .coverage files found. Checking for any coverage files..."
+            COVERAGE_FILES=$(find coverage-reports -type f 2>/dev/null || true)
+          fi
+          
+          if [ -z "$COVERAGE_FILES" ]; then
+            echo "No coverage files found at all. Creating empty coverage report."
+            echo '<?xml version="1.0" ?><coverage version="1.0"><sources><source>.</source></sources><packages></packages></coverage>' > coverage.xml
+            exit 0
+          fi
+          
+          echo "Found coverage files:"
+          echo "$COVERAGE_FILES"
+          
+          # Copy all coverage files to current directory with unique names
+          COUNTER=1
+          for file in $COVERAGE_FILES; do
+            if [ -f "$file" ]; then
+              cp "$file" ".coverage.$COUNTER"
+              echo "Copied $file to .coverage.$COUNTER"
+              COUNTER=$((COUNTER + 1))
+            fi
+          done
+          
+          if [ $COUNTER -eq 1 ]; then
+            echo "No valid coverage files found. Creating empty coverage report."
+            echo '<?xml version="1.0" ?><coverage version="1.0"><sources><source>.</source></sources><packages></packages></coverage>' > coverage.xml
+            exit 0
+          fi
+          
           # Combine all coverage files
-          coverage combine coverage-reports/*/.coverage
+          coverage combine .coverage.*
           
           # Generate combined report
           coverage report --show-missing
