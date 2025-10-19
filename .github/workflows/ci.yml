@@ -146,12 +146,15 @@ jobs:
         run: |
           uv run coverage report
 
+      - name: Rename coverage file for combining
+        run: mv .coverage .coverage.${{ matrix.module }}
+
       - name: Upload ${{ matrix.module }} coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report-${{ matrix.module }}
-          path: .coverage
+          path: .coverage.${{ matrix.module }}
           retention-days: 30
 
   test-summary:
@@ -187,9 +190,12 @@ jobs:
           pattern: coverage-report-*
           merge-multiple: true
 
+      - name: List downloaded files
+        run: ls -R coverage-reports
+
       - name: Combine coverage reports
         run: |
-          uv run coverage combine
+          uv run coverage combine coverage-reports
 
       - name: Generate total coverage report
         id: coverage-comment
