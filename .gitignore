@@ -34,3 +34,10 @@ mediafiles/
 
 # Docker volumes
 postgres_data/
+
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/

@@ -1,4 +1,5 @@
 from django.db import transaction
+
 from rest_framework.exceptions import APIException
 from tenant_users.tenants.models import DeleteError
 from tenant_users.tenants.tasks import provision_tenant
