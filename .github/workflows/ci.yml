@@ -135,26 +135,22 @@ jobs:
 
       - name: Run ${{ matrix.module }} module tests with coverage
         run: |
-          uv run coverage run --source='${{ matrix.module }}' manage.py test ${{ matrix.module }} --keepdb
+          uv run coverage erase
+          uv run coverage run --source=${{ matrix.module }} manage.py test ${{ matrix.module }} --keepdb
+          uv run coverage xml -o coverage-${{ matrix.module }}.xml
+          uv run coverage html -d htmlcov-${{ matrix.module }}
         env:
           DJANGO_SETTINGS_MODULE: config.settings
-
-      - name: List files after coverage run
-        run: ls -la
-
-      - name: Generate coverage report for ${{ matrix.module }}
-        run: |
-          uv run coverage report
-
-      - name: Rename coverage file for combining
-        run: mv .coverage .coverage.${{ matrix.module }}
+          PYTHONPATH: ${{ github.workspace }}
 
       - name: Upload ${{ matrix.module }} coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-${{ matrix.module }}
-          path: .coverage.${{ matrix.module }}
+          name: coverage-${{ matrix.module }}
+          path: |
+            coverage-${{ matrix.module }}.xml
+            htmlcov-${{ matrix.module }}
           retention-days: 30
 
   test-summary:
@@ -185,30 +181,31 @@ jobs:
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
-        id: download-reports
+        id: download
         with:
+          pattern: coverage-*
           path: coverage-reports
-          pattern: coverage-report-*
           merge-multiple: true
 
-      - name: List downloaded files
-        if: steps.download-reports.outputs.download-path
-        run: ls -R coverage-reports
-
       - name: Combine coverage reports
-        if: steps.download-reports.outputs.download-path
+        if: success()
         run: |
-          uv run coverage combine coverage-reports
+          mkdir -p combined-coverage
+          uv pip install coverage-merge
+          find coverage-reports -name "*.xml" -exec cp {} combined-coverage/ \;
+          cd combined-coverage
+          uv run coverage-merge *.xml ../coverage-combined.xml
 
-      - name: Generate total coverage report
-        if: steps.download-reports.outputs.download-path
-        id: coverage-comment
-        uses: py-cov-action/python-coverage-comment-action@v3.38
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate HTML report
+        if: success()
+        run: |
+          uv run coverage html -d htmlcov --fail-under=70
 
-      - name: Upload total coverage report
+      - name: Upload combined coverage report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: total-coverage-report
-          path: htmlcov
+          name: combined-coverage
+          path: |
+            coverage-combined.xml
+            htmlcov
