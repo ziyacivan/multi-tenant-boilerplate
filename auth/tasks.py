@@ -18,7 +18,7 @@ def send_verification_email_task(
 @shared_task
 def send_reset_email_task(user_id: int, reset_url: str):
     from users.models import User
-    
+
     email_service = EmailService()
     try:
         user = User.objects.get(id=user_id)
