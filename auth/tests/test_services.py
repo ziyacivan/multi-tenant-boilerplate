@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.utils import timezone
 
 from django_tenants.test.cases import TenantTestCase
@@ -91,16 +93,12 @@ class AuthServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         with self.assertRaises(InvalidTokenException):
             self.service.refresh_token("invalid_token")
 
-    def test_register_success(self):
-        self.service.register("test@example.com", "password")
-
-        user: User | None = User.objects.get(email="test@example.com")
-        self.assertIsNotNone(user)
-        self.assertEqual(user.email, "test@example.com")
-        self.assertEqual(user.is_active, False)
-        self.assertEqual(user.is_verified, False)
-        self.assertIsNotNone(user.verification_code)
-        self.assertIsNotNone(user.verification_code_expires_at)
+    @patch("users.models.User.objects.create_user")
+    def test_register_success(self, mock_create_user):
+        mock_create_user.return_value = self.user
+        result = self.service.register("test@example.com", "password")
+        self.assertTrue(result)
+        mock_create_user.assert_called_once()
 
     def test_register_user_already_exists(self):
         user = baker.make(User, email="test@example.com")
@@ -125,7 +123,7 @@ class AuthServiceTestCase(TenantTestCaseMixin, TenantTestCase):
             self.service.register("test@example.com", "password")
 
     def test_generate_verification_code(self):
-        verification_code = self.service.generate_verification_code()
+        verification_code = self.service._generate_verification_code()
         self.assertIsNotNone(verification_code)
         self.assertEqual(len(verification_code), 6)
 

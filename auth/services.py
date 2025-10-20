@@ -1,10 +1,10 @@
 import random
 import string
+from datetime import timedelta
 
 from django.conf import settings
-from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.db.models import QuerySet
+from django.db import transaction
 from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -30,29 +30,34 @@ from utils.services import EmailService
 
 
 class AuthService:
-    email_service = EmailService()
+    VERIFICATION_CODE_LENGTH = 6
+    VERIFICATION_CODE_EXPIRY_MINUTES = 15
+
+    def __init__(self):
+        self.email_service = EmailService()
+        self.token_generator = PasswordResetTokenGenerator()
 
     @staticmethod
     def validate_credentials(email: str, password: str) -> dict[str, str]:
-        user_qs: QuerySet[User] = User.objects.filter(email=email)
-        if not user_qs.exists():
+        try:
+            user = User.objects.get(email=email)
+
+            if not user.check_password(password):
+                raise InvalidCredentialsException()
+
+            if not user.is_active:
+                raise UserNotActiveException()
+
+            if not user.is_verified:
+                raise UserNotVerifiedException()
+
+            refresh = RefreshToken.for_user(user)
+            return {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }
+        except User.DoesNotExist:
             raise InvalidCredentialsException()
-
-        user_instance: User = user_qs.first()
-        if not user_instance.is_active:
-            raise UserNotActiveException()
-
-        if not user_instance.check_password(password):
-            raise InvalidCredentialsException()
-
-        if not user_instance.is_verified:
-            raise UserNotVerifiedException()
-
-        refresh = RefreshToken.for_user(user_instance)
-        return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        }
 
     @staticmethod
     def refresh_token(refresh_token: str) -> dict[str, str]:
@@ -66,55 +71,53 @@ class AuthService:
             raise InvalidTokenException() from e
 
     def register(self, email: str, password: str) -> bool:
-        user: User | None = User.objects.filter(email=email).first()
-        if user:
-            if user.is_verified is False:
+        existing_user = User.objects.filter(email=email).first()
+        if existing_user:
+            if not existing_user.is_verified:
                 raise UserIsAlreadyInVerificationProcessException(
-                    verification_code_expires_at=user.verification_code_expires_at,
-                    is_verified=user.is_verified,
+                    verification_code_expires_at=existing_user.verification_code_expires_at,
+                    is_verified=existing_user.is_verified,
                 )
-
             raise UserAlreadyExistsException()
 
-        from django.db import connection
-
-        connection.set_schema_to_public()
-
-        instance: User = User.objects.create_user(email=email, password=password)
-        instance.verification_code = self.generate_verification_code()
-        instance.verification_code_expires_at = timezone.now() + timezone.timedelta(
-            minutes=15
-        )
-        instance.is_active = False
-        instance.is_verified = False
-        instance.save()
+        extra_fields = {
+            "is_active": False,
+            "verification_code": self._generate_verification_code(),
+            "verification_code_expires_at": timezone.now()
+            + timedelta(minutes=self.VERIFICATION_CODE_EXPIRY_MINUTES),
+        }
+        user = User.objects.create_user(email=email, password=password, **extra_fields)
 
         send_verification_email_task.delay(
-            email, instance.verification_code, instance.verification_code_expires_at
+            email, user.verification_code, user.verification_code_expires_at
         )
         return True
 
     @staticmethod
-    def generate_verification_code() -> str:
+    def _generate_verification_code() -> str:
         return "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
     @staticmethod
-    def verify_email(email: str, verification_code: str) -> dict[str, str]:
-        user_qs: QuerySet[User] = User.objects.filter(email=email)
-        if not user_qs.exists():
-            raise InvalidCredentialsException()
+    def _is_valid_verification_code(user: User, verification_code: str) -> bool:
+        """Check if verification code is valid."""
+        return (
+            user.verification_code
+            and user.verification_code == verification_code
+            and user.verification_code_expires_at
+            and timezone.now() <= user.verification_code_expires_at
+        )
 
-        user: User = user_qs.first()
+    @transaction.atomic
+    def verify_email(self, email: str, verification_code: str) -> dict[str, str]:
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise InvalidCredentialsException()
 
         if user.is_verified:
             raise UserAlreadyVerifiedException()
 
-        if (
-            not user.verification_code
-            or user.verification_code != verification_code
-            or not user.verification_code_expires_at
-            or timezone.now() > user.verification_code_expires_at
-        ):
+        if not self._is_valid_verification_code(user, verification_code):
             raise InvalidVerificationCodeException()
 
         user.is_verified = True
@@ -126,12 +129,13 @@ class AuthService:
 
         return {"email": email, "is_verified": user.is_verified}
 
+    @transaction.atomic
     def resend_verification_email(self, email: str) -> bool:
-        user_qs: QuerySet[User] = User.objects.filter(email=email)
-        if not user_qs.exists():
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
             raise InvalidCredentialsException()
 
-        user: User = user_qs.first()
         if user.is_verified:
             raise UserAlreadyVerifiedException()
 
@@ -141,11 +145,12 @@ class AuthService:
         ):
             raise UserIsAlreadyInVerificationProcessException()
 
-        user.verification_code = self.generate_verification_code()
-        user.verification_code_expires_at = timezone.now() + timezone.timedelta(
-            minutes=15
+        user.verification_code = self._generate_verification_code()
+        user.verification_code_expires_at = timezone.now() + timedelta(
+            minutes=self.VERIFICATION_CODE_EXPIRY_MINUTES
         )
         user.save()
+
         send_verification_email_task.delay(
             email, user.verification_code, user.verification_code_expires_at
         )
@@ -155,21 +160,12 @@ class AuthService:
     def _get_user_from_uidb64(uidb64: str) -> User | None:
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-            return user
+            return User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             return None
 
-    def request_password_reset(self, email: str, request: Request):
-        try:
-            user = User.objects.get(email__iexact=email)
-        except User.DoesNotExist:
-            return
-
-        token_generator = PasswordResetTokenGenerator()
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = token_generator.make_token(user)
-
+    @staticmethod
+    def _build_reset_url(request: Request, uid: str, token: str) -> str:
         current_domain = request.get_host().split(":")[0]
         scheme = "https" if not settings.DEBUG else "http"
 
@@ -179,19 +175,27 @@ class AuthService:
         except Domain.DoesNotExist:
             tenant_domain = settings.TENANT_USERS_DOMAIN
 
-        frontend_reset_url = (
-            f"{scheme}://{tenant_domain}:3000/reset-password/{uid}/{token}"
-        )
+        return f"{scheme}://{tenant_domain}:3000/reset-password/{uid}/{token}"
 
-        send_reset_email_task.delay(user.id, frontend_reset_url)
+    def request_password_reset(self, email: str, request: Request):
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return
 
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = self.token_generator.make_token(user)
+
+        reset_url = self._build_reset_url(request, uid, token)
+        send_reset_email_task.delay(user.id, reset_url)
+
+    @transaction.atomic
     def confirm_password_reset(
         self, uidb64: str, token: str, new_password: str
     ) -> tuple[bool, str]:
         user = self._get_user_from_uidb64(uidb64)
-        token_generator = PasswordResetTokenGenerator()
 
-        if user is not None and token_generator.check_token(user, token):
+        if user is not None and self.token_generator.check_token(user, token):
             user.set_password(new_password)
             user.save()
             return True, _("Password has been reset successfully.")
