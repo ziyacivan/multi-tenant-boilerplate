@@ -11,19 +11,20 @@ class EmployeeService(BaseService):
     client_service = ClientService()
 
     def create_object(
-        self, user: User, first_name: str, last_name: str, gender: str, **kwargs: dict
+        self, user: User, first_name: str, last_name: str, **kwargs: dict
     ) -> Employee:
         instance = Employee(
             user=user,
             first_name=first_name,
             last_name=last_name,
-            gender=gender,
             **kwargs,
         )
         instance.save()
         return instance
 
     def update_object(self, instance: Employee, **kwargs: dict) -> Employee:
+        kwargs.pop("is_active", None)
+
         for key, value in kwargs.items():
             setattr(instance, key, value)
         instance.save(update_fields=kwargs.keys())
