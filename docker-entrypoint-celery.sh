@@ -21,16 +21,8 @@ rm -rf .venv || true
 echo "📦 Running migrations for public schema..."
 uv run python manage.py migrate_schemas --shared
 
-if [ "$CONTAINER_TYPE" = "web" ]; then
-  echo "🏢 Setting up development tenants..."
-  uv run python manage.py setup_dev_tenants
-fi
-
 echo "📦 Running migrations for tenant schemas..."
 uv run python manage.py migrate_schemas --tenant || true
 
-echo "📁 Collecting static files..."
-uv run python manage.py collectstatic --noinput || true
-
-echo "🚀 Starting server..."
+echo "🚀 Starting Celery worker..."
 exec "$@"
