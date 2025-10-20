@@ -8,6 +8,7 @@ class EmployeeRole(models.TextChoices):
     employee = "employee", _("Employee")
 
 
-class EmployeeContractType(models.TextChoices):
-    indefinite = "indefinite", _("Indefinite")
-    limited = "limited", _("Limited")
+class EmployeeGender(models.TextChoices):
+    male = "male", _("Male")
+    female = "female", _("Female")
+    other = "other", _("Other")
