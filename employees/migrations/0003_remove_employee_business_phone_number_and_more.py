@@ -4,43 +4,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('employees', '0002_employee_attributes'),
+        ("employees", "0002_employee_attributes"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='employee',
-            name='business_phone_number',
+            model_name="employee",
+            name="business_phone_number",
         ),
         migrations.RemoveField(
-            model_name='employee',
-            name='contract_end_date',
+            model_name="employee",
+            name="contract_end_date",
         ),
         migrations.RemoveField(
-            model_name='employee',
-            name='contract_type',
+            model_name="employee",
+            name="contract_type",
         ),
         migrations.RemoveField(
-            model_name='employee',
-            name='employment_date',
+            model_name="employee",
+            name="employment_date",
         ),
         migrations.RemoveField(
-            model_name='employee',
-            name='identification_number',
+            model_name="employee",
+            name="identification_number",
         ),
         migrations.RemoveField(
-            model_name='employee',
-            name='phone_number',
+            model_name="employee",
+            name="phone_number",
         ),
         migrations.RemoveField(
-            model_name='employee',
-            name='termination_date',
+            model_name="employee",
+            name="termination_date",
         ),
         migrations.AddField(
-            model_name='employee',
-            name='gender',
-            field=models.CharField(blank=True, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')], default='male', max_length=20, null=True, verbose_name='gender'),
+            model_name="employee",
+            name="gender",
+            field=models.CharField(
+                blank=True,
+                choices=[("male", "Male"), ("female", "Female"), ("other", "Other")],
+                default="male",
+                max_length=20,
+                null=True,
+                verbose_name="gender",
+            ),
         ),
     ]

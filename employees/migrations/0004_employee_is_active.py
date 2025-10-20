@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('employees', '0003_remove_employee_business_phone_number_and_more'),
+        ("employees", "0003_remove_employee_business_phone_number_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='employee',
-            name='is_active',
-            field=models.BooleanField(default=True, verbose_name='is active'),
+            model_name="employee",
+            name="is_active",
+            field=models.BooleanField(default=True, verbose_name="is active"),
         ),
     ]
