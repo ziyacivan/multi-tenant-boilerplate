@@ -8,6 +8,13 @@ done
 
 echo "✅ PostgreSQL is ready!"
 
+echo "🔄 Waiting for Redis..."
+while ! redis-cli -h redis ping > /dev/null 2>&1; do
+  sleep 1
+done
+
+echo "✅ Redis is ready!"
+
 echo "📦 Running migrations for public schema..."
 uv run python manage.py migrate_schemas --shared
 
