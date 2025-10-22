@@ -51,10 +51,14 @@ class LoginView(views.APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        tokens: dict[str, str] = self.service_class.validate_credentials(
+        tokens, related_tenant = self.service_class.validate_credentials(
             data["email"], data["password"]
         )
-        return Response(tokens, status=status.HTTP_200_OK)
+        return Response(
+            tokens,
+            status=status.HTTP_200_OK,
+            headers={"X-Related-Tenant": related_tenant.pk},
+        )
 
 
 class RefreshTokenView(views.APIView):
