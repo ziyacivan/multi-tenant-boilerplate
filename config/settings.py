@@ -52,7 +52,7 @@ TENANT_MODEL = "tenants.Client"
 TENANT_DOMAIN_MODEL = "tenants.Domain"
 
 MIDDLEWARE = [
-    "django_tenants.middleware.main.TenantMainMiddleware",
+    "tenants.middleware.CustomTenantMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
