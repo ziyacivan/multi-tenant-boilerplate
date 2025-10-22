@@ -49,7 +49,9 @@ class AuthServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         self.client = TenantClient(self.tenant)
 
     def test_validate_credentials_success(self):
-        tokens = self.service.validate_credentials(self.user.email, "password")
+        tokens, related_tenant = self.service.validate_credentials(
+            self.user.email, "password"
+        )
 
         required_fields = ["refresh", "access"]
         for field in required_fields:
