@@ -16,7 +16,7 @@ from employees.services import EmployeeService
 
 
 class EmployeeViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
-    queryset = Employee.objects.all().order_by("-created_on")
+    queryset = Employee.objects.select_related("user").all().order_by("-created_on")
     serializer_class = EmployeeSerializer
     serializer_action_classes = {
         "create": EmployeeCreateSerializer,
