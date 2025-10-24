@@ -4,6 +4,7 @@ from model_bakery import baker
 from employees.choices import EmployeeGender, EmployeeRole
 from employees.exceptions import CannotDeleteEmployeeException
 from employees.models import Employee
+from employees.serializers import EmployeeCreateSerializer
 from employees.services import EmployeeService
 from users.models import User
 from utils.tests.mixins import TenantTestCaseMixin
@@ -113,3 +114,15 @@ class EmployeeServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         self.assertTrue(self.employee.is_active)
 
         self.assertTrue(Employee.objects.filter(id=self.employee.id).exists())
+
+    def test_create_object_without_user(self):
+        serializer = EmployeeCreateSerializer(
+            data={
+                "first_name": "John",
+                "last_name": "Doe",
+                "email": "test@test.com",
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        employee = self.service.create_object(**serializer.validated_data)
+        self.assertIsNotNone(employee)

@@ -1,25 +1,28 @@
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from employees.mixins import MultiSerializerViewSetMixin
 from employees.models import Employee
 from employees.permissions import IsMinimumManagerOrReadOnly
-from employees.serializers import EmployeeSerializer
+from employees.serializers import EmployeeCreateSerializer, EmployeeSerializer
 from employees.services import EmployeeService
 
 
-class EmployeeViewSet(viewsets.ModelViewSet):
+class EmployeeViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
     queryset = Employee.objects.all().order_by("-created_on")
     serializer_class = EmployeeSerializer
+    serializer_action_classes = {
+        "create": EmployeeCreateSerializer,
+    }
     permission_classes = [IsAuthenticated, IsMinimumManagerOrReadOnly]
     service_class = EmployeeService()
 
-    def perform_create(self, serializer):  # TODO: perform-create kapatmam lazım.
-        serializer.instance = self.service_class.create_object(
-            **serializer.validated_data
-        )
+    def perform_create(self, serializer):
+        validated_data = serializer.validated_data
+        serializer.instance = self.service_class.create_object(**validated_data)
 
     def perform_update(self, serializer):
         serializer.instance = self.service_class.update_object(
