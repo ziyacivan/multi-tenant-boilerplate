@@ -1,9 +1,11 @@
+from django.db import connection
 from django.utils.translation import gettext_lazy as _
 
 from employees.choices import EmployeeRole
 from employees.exceptions import (
     CannotDeleteEmployeeException,
     EmployeeNotFoundException,
+    UserAlreadyExists,
 )
 from employees.models import Employee
 from tenants.models import Client
@@ -16,11 +18,32 @@ class EmployeeService(BaseService):
     client_service = ClientService()
 
     def create_object(
-        self, user: User, first_name: str = None, last_name: str = None, **kwargs: dict
+        self,
+        user: User = None,
+        first_name: str = None,
+        last_name: str = None,
+        **kwargs: dict,
     ) -> Employee:
         if first_name is None and last_name is None:
             first_name = "John"
             last_name = "Doe"
+
+        if user is None:
+            from django_tenants.utils import schema_context
+
+            with schema_context("public"):
+                user = User.objects.filter(email=kwargs.get("email"))
+                if user.exists():
+                    raise UserAlreadyExists()
+
+                user = User.objects.create_user(
+                    email=kwargs.get("email"),
+                )
+                user.set_unusable_password()
+                user.is_verified = False
+                user.save()
+
+            kwargs.pop("email", None)
 
         instance = Employee(
             user=user,

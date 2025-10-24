@@ -39,3 +39,7 @@ class Employee(BaseModel):
     class Meta:
         verbose_name = _("employee")
         verbose_name_plural = _("employees")
+
+    @property
+    def email(self):
+        return self.user.email
