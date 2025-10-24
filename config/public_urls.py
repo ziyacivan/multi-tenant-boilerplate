@@ -21,16 +21,16 @@ urlpatterns = [
                 path("schema/", SpectacularAPIView.as_view(), name="schema"),
                 path(
                     "schema/swagger-ui/",
-                    SpectacularSwaggerView.as_view(url_name="schema"),
+                    SpectacularSwaggerView.as_view(url="/api/v1/schema/"),
                     name="swagger-ui",
                 ),
                 path(
                     "schema/redoc/",
-                    SpectacularRedocView.as_view(url_name="schema"),
+                    SpectacularRedocView.as_view(url="/api/v1/schema/"),
                     name="redoc",
                 ),
             ]
             + public_router.urls
         ),
-    )
+    ),
 ]
