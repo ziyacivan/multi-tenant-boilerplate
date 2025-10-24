@@ -3,4 +3,4 @@ class MultiSerializerViewSetMixin:
         try:
             return self.serializer_action_classes[self.action]
         except (KeyError, AttributeError):
-            return super(self).get_serializer_class()
+            return super().get_serializer_class()
