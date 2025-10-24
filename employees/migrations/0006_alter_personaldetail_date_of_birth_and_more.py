@@ -4,34 +4,42 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('employees', '0005_personaldetail'),
+        ("employees", "0005_personaldetail"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='personaldetail',
-            name='date_of_birth',
+            model_name="personaldetail",
+            name="date_of_birth",
             field=models.DateField(blank=True, db_index=True, null=True),
         ),
         migrations.AlterField(
-            model_name='personaldetail',
-            name='identification_number',
-            field=models.CharField(blank=True, db_index=True, max_length=11, null=True, unique=True),
+            model_name="personaldetail",
+            name="identification_number",
+            field=models.CharField(
+                blank=True, db_index=True, max_length=11, null=True, unique=True
+            ),
         ),
         migrations.AlterField(
-            model_name='personaldetail',
-            name='payroll_bank_account_iban',
-            field=models.CharField(blank=True, db_index=True, max_length=34, null=True, unique=True),
+            model_name="personaldetail",
+            name="payroll_bank_account_iban",
+            field=models.CharField(
+                blank=True, db_index=True, max_length=34, null=True, unique=True
+            ),
         ),
         migrations.AlterField(
-            model_name='personaldetail',
-            name='personal_phone',
-            field=models.CharField(blank=True, db_index=True, max_length=20, null=True, unique=True),
+            model_name="personaldetail",
+            name="personal_phone",
+            field=models.CharField(
+                blank=True, db_index=True, max_length=20, null=True, unique=True
+            ),
         ),
         migrations.AddIndex(
-            model_name='personaldetail',
-            index=models.Index(fields=['identification_number', 'date_of_birth'], name='personal_id_dob_idx'),
+            model_name="personaldetail",
+            index=models.Index(
+                fields=["identification_number", "date_of_birth"],
+                name="personal_id_dob_idx",
+            ),
         ),
     ]
