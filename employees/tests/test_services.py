@@ -3,7 +3,7 @@ from model_bakery import baker
 
 from employees.choices import EmployeeGender, EmployeeRole
 from employees.exceptions import CannotDeleteEmployeeException
-from employees.models import Employee
+from employees.models import Employee, PersonalDetail
 from employees.serializers import EmployeeCreateSerializer
 from employees.services import EmployeeService
 from users.models import User
@@ -126,3 +126,40 @@ class EmployeeServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         serializer.is_valid(raise_exception=True)
         employee = self.service.create_object(**serializer.validated_data)
         self.assertIsNotNone(employee)
+
+    def test_get_personal_detail(self):
+        self.employee.personaldetail = baker.make(
+            PersonalDetail,
+            employee=self.employee,
+            personal_phone="1234567890",
+        )
+        self.employee.personaldetail.save()
+        personal_detail = self.service.get_personal_detail(self.employee)
+        self.assertIsNotNone(personal_detail)
+        self.assertEqual(personal_detail.personal_phone, "1234567890")
+
+    def test_get_personal_detail_none(self):
+        personal_detail = self.service.get_personal_detail(self.employee)
+        self.assertIsNone(personal_detail)
+
+    def test_create_or_update_personal_detail(self):
+        personal_detail: PersonalDetail | None = (
+            self.service.create_or_update_personal_detail(
+                employee=self.employee,
+                personal_phone="0987654321",
+                address="123 Main St",
+            )
+        )
+        self.assertIsNotNone(personal_detail)
+        self.assertEqual(personal_detail.personal_phone, "0987654321")
+        self.assertEqual(personal_detail.address, "123 Main St")
+
+        updated_personal_detail: PersonalDetail | None = (
+            self.service.create_or_update_personal_detail(
+                employee=self.employee,
+                personal_phone="1112223333",
+            )
+        )
+        self.assertIsNotNone(updated_personal_detail)
+        self.assertEqual(updated_personal_detail.personal_phone, "1112223333")
+        self.assertEqual(updated_personal_detail.address, "123 Main St")

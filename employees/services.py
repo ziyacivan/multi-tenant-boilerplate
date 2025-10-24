@@ -1,4 +1,4 @@
-from django.db import connection
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from employees.choices import EmployeeRole
@@ -7,8 +7,7 @@ from employees.exceptions import (
     EmployeeNotFoundException,
     UserAlreadyExists,
 )
-from employees.models import Employee
-from tenants.models import Client
+from employees.models import Employee, PersonalDetail
 from tenants.services import ClientService
 from users.models import User
 from utils.interfaces import BaseService
@@ -82,3 +81,21 @@ class EmployeeService(BaseService):
         except Employee.DoesNotExist:
             raise EmployeeNotFoundException()
         return employee
+
+    @staticmethod
+    def get_personal_detail(employee: Employee) -> PersonalDetail:
+        try:
+            return employee.personaldetail
+        except PersonalDetail.DoesNotExist:
+            return None
+
+    @staticmethod
+    def create_or_update_personal_detail(
+        employee: Employee, **kwargs: dict
+    ) -> PersonalDetail:
+        with transaction.atomic():
+            pd, _created = PersonalDetail.objects.get_or_create(employee=employee)
+            for key, value in kwargs.items():
+                setattr(pd, key, value)
+            pd.save()
+            return pd
