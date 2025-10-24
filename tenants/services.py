@@ -4,6 +4,8 @@ from rest_framework.exceptions import APIException
 from tenant_users.tenants.models import DeleteError
 from tenant_users.tenants.tasks import provision_tenant
 
+from employees.choices import EmployeeRole
+from employees.services import EmployeeService
 from tenants.exceptions import (
     CompanyAlreadyExistsException,
     UserAlreadyHaveCompanyException,
@@ -14,6 +16,9 @@ from utils.interfaces import BaseService
 
 
 class ClientService(BaseService):
+    employee_service = EmployeeService()
+
+    @transaction.atomic
     def create_object(
         self,
         name: str,
@@ -57,6 +62,8 @@ class ClientService(BaseService):
         tenant.invoice_email_address = invoice_email_address
         tenant.short_name = short_name
         tenant.save()
+
+        self.employee_service.create_object(user=owner, role=EmployeeRole.owner)
         return tenant
 
     def update_object(self, instance: Client, **kwargs) -> Client:

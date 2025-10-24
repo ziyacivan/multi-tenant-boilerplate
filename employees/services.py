@@ -11,8 +11,12 @@ class EmployeeService(BaseService):
     client_service = ClientService()
 
     def create_object(
-        self, user: User, first_name: str, last_name: str, **kwargs: dict
+        self, user: User, first_name: str = None, last_name: str = None, **kwargs: dict
     ) -> Employee:
+        if first_name is None and last_name is None:
+            first_name = "John"
+            last_name = "Doe"
+
         instance = Employee(
             user=user,
             first_name=first_name,
