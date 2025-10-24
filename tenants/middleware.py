@@ -22,17 +22,23 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             authentication_class = JWTAuthentication()
             header = authentication_class.get_header(request)
             if header:
-                raw_token = authentication_class.get_raw_token(header)
-                validated_token = authentication_class.get_validated_token(raw_token)
-                user = authentication_class.get_user(validated_token)
+                try:
+                    raw_token = authentication_class.get_raw_token(header)
+                    validated_token = authentication_class.get_validated_token(
+                        raw_token
+                    )
+                    user = authentication_class.get_user(validated_token)
 
-                if tenant in user.tenants.all():
-                    tenant.domain_url = self.hostname_from_request(request)
-                    request.tenant = tenant
-                    connection.set_tenant(request.tenant)
-                    self.setup_url_routing(request)
-                else:
-                    return self.return_default_tenant(request)
+                    if tenant not in user.tenants.all():
+                        return self.return_default_tenant(request)
+                except Exception:
+                    pass
+
+            tenant.domain_url = self.hostname_from_request(request)
+            request.tenant = tenant
+            connection.set_tenant(request.tenant)
+            self.setup_url_routing(request)
+
         except domain_model.DoesNotExist:
             return self.return_default_tenant(request)
 

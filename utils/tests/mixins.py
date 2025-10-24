@@ -8,9 +8,15 @@ from django_tenants.utils import (
     get_public_schema_name,
     get_tenant_domain_model,
     get_tenant_model,
+    tenant_context,
 )
 from model_bakery import baker
+from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from employees.choices import EmployeeRole
+from employees.models import Employee
+from users.models import User
 
 Tenant = get_tenant_model()
 Domain = get_tenant_domain_model()
@@ -73,68 +79,61 @@ class AuthenticatedTenantTestMixin(TenantTestCaseMixin):
 
     def setUp(self):
         super().setUp()
-        self.client = TenantClient(self.tenant)
-        self.test_user = None
-        self.test_employee = None
+        self.tenant_id = str(self.tenant.pk)
+        self.client = APIClient()
         self._auth_token = None
+        self.test_employee = None
 
-    def create_test_user(self, email="testuser@example.com", password="testpass123"):
-        user = baker.make(TenantUser, email=email)
-        user.set_password(password)
-        user.is_active = True
-        user.is_verified = True
-        user.save()
+    def authenticate_client(self, role: EmployeeRole = EmployeeRole.employee):
+        user = self.create_test_user(email=f"test_{role}@test.com")
+
+        self.test_employee = self.create_test_employee(user=user, role=role)
+
+        refresh = RefreshToken.for_user(user)
+        self._auth_token = str(refresh.access_token)
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._auth_token}")
+
+    def create_test_user(self, email: str, **kwargs) -> User:
+        with tenant_context(self.tenant):
+            user = User.objects.create(email=email, **kwargs)
         return user
 
-    def create_test_employee(self, user=None, role="employee", **kwargs):
-        from employees.models import Employee
-
+    def create_test_employee(
+        self, user: User = None, role: EmployeeRole = EmployeeRole.employee, **kwargs
+    ) -> Employee:
         if user is None:
-            user = self.create_test_user()
+            user = self.create_test_user(email="auto_generated@test.com")
 
         employee_data = {
             "user": user,
-            "first_name": kwargs.get("first_name", "Test"),
-            "last_name": kwargs.get("last_name", "User"),
+            "first_name": kwargs.pop("first_name", "Test"),
+            "last_name": kwargs.pop("last_name", "Employee"),
             "role": role,
-            "is_active": True,
+            **kwargs,
         }
-        employee_data.update(kwargs)
 
-        employee = Employee.objects.create(**employee_data)
+        with tenant_context(self.tenant):
+            employee = Employee.objects.create(**employee_data)
+
         return employee
 
-    def get_auth_token(self, user):
-        refresh = RefreshToken.for_user(user)
-        return str(refresh.access_token)
+    def get(self, path: str, **kwargs):
+        kwargs.setdefault("HTTP_X_CLIENT", self.tenant_id)
+        return self.client.get(path, **kwargs)
 
-    def authenticate_client(self, user=None, role="employee"):
-        if user is None:
-            user = self.create_test_user()
+    def post(self, path: str, data=None, **kwargs):
+        kwargs.setdefault("HTTP_X_CLIENT", self.tenant_id)
+        return self.client.post(path, data, **kwargs)
 
-        self.test_user = user
-        self.test_employee = self.create_test_employee(user=user, role=role)
+    def put(self, path: str, data=None, **kwargs):
+        kwargs.setdefault("HTTP_X_CLIENT", self.tenant_id)
+        return self.client.put(path, data, **kwargs)
 
-        self._auth_token = self.get_auth_token(user)
+    def patch(self, path: str, data=None, **kwargs):
+        kwargs.setdefault("HTTP_X_CLIENT", self.tenant_id)
+        return self.client.patch(path, data, **kwargs)
 
-        return self.test_user, self.test_employee
-
-    def _add_auth_header(self, kwargs):
-        if self._auth_token:
-            kwargs.setdefault("HTTP_AUTHORIZATION", f"Bearer {self._auth_token}")
-        return kwargs
-
-    def get(self, *args, **kwargs):
-        return self.client.get(*args, **self._add_auth_header(kwargs))
-
-    def post(self, *args, **kwargs):
-        return self.client.post(*args, **self._add_auth_header(kwargs))
-
-    def put(self, *args, **kwargs):
-        return self.client.put(*args, **self._add_auth_header(kwargs))
-
-    def patch(self, *args, **kwargs):
-        return self.client.patch(*args, **self._add_auth_header(kwargs))
-
-    def delete(self, *args, **kwargs):
-        return self.client.delete(*args, **self._add_auth_header(kwargs))
+    def delete(self, path: str, **kwargs):
+        kwargs.setdefault("HTTP_X_CLIENT", self.tenant_id)
+        return self.client.delete(path, **kwargs)
