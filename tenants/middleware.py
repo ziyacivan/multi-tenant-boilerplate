@@ -7,7 +7,17 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class CustomTenantMiddleware(TenantMainMiddleware):
+    EXEMPT_URLS = [
+        "/api/v1/schema/",
+        "/api/v1/schema/swagger-ui/",
+        "/api/v1/schema/redoc/",
+    ]
+
     def process_request(self, request):
+        if any(request.path.startswith(url) for url in self.EXEMPT_URLS):
+            connection.set_schema_to_public()
+            return None
+
         connection.set_schema_to_public()
         tenant_id = self.tenant_id_from_request(request)
         if not tenant_id:
