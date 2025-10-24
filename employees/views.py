@@ -13,7 +13,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsMinimumManagerOrReadOnly]
     service_class = EmployeeService()
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer):  # TODO: perform-create kapatmam lazım.
         serializer.instance = self.service_class.create_object(
             **serializer.validated_data
         )

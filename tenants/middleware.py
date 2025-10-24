@@ -38,7 +38,7 @@ class CustomTenantMiddleware(TenantMainMiddleware):
 
     @staticmethod
     def tenant_id_from_request(request: HttpRequest):
-        return request.META.get("HTTP_X_TENANT")
+        return request.META.get("HTTP_X_CLIENT")
 
     def get_tenant(self, domain_model, tenant_id):
         domain = domain_model.objects.select_related("tenant").get(tenant__pk=tenant_id)

@@ -165,17 +165,8 @@ class AuthService:
             return None
 
     @staticmethod
-    def _build_reset_url(request: Request, uid: str, token: str) -> str:
-        current_domain = request.get_host().split(":")[0]
-        scheme = "https" if not settings.DEBUG else "http"
-
-        try:
-            domain_object = Domain.objects.get(domain=current_domain)
-            tenant_domain = domain_object.domain
-        except Domain.DoesNotExist:
-            tenant_domain = settings.TENANT_USERS_DOMAIN
-
-        return f"{scheme}://{tenant_domain}:3000/reset-password/{uid}/{token}"
+    def _build_reset_url(uid: str, token: str) -> str:
+        return f"{settings.FRONTEND_URL}/onboarding/employee/{uid}/{token}"
 
     def request_password_reset(self, email: str, request: Request):
         try:
@@ -186,7 +177,7 @@ class AuthService:
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = self.token_generator.make_token(user)
 
-        reset_url = self._build_reset_url(request, uid, token)
+        reset_url = self._build_reset_url(uid, token)
         send_reset_email_task.delay(user.id, reset_url)
 
     @transaction.atomic
