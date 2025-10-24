@@ -7,7 +7,9 @@ from utils.models import BaseModel
 
 
 class Employee(BaseModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name=_("user"))
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, verbose_name=_("user"), db_index=True
+    )
     first_name = models.CharField(_("first name"), max_length=255)
     last_name = models.CharField(_("last name"), max_length=255)
     photo = models.ImageField(
@@ -25,6 +27,7 @@ class Employee(BaseModel):
         null=True,
         blank=True,
         verbose_name=_("manager"),
+        db_index=True,
     )
     gender = models.CharField(
         _("gender"),

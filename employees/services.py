@@ -77,7 +77,7 @@ class EmployeeService(BaseService):
     @staticmethod
     def get_employee_by_user(user: User) -> Employee:
         try:
-            employee = Employee.objects.get(user=user)
+            employee = Employee.objects.select_related("user").get(user=user)
         except Employee.DoesNotExist:
             raise EmployeeNotFoundException()
         return employee
