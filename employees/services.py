@@ -1,5 +1,10 @@
+from django.utils.translation import gettext_lazy as _
+
 from employees.choices import EmployeeRole
-from employees.exceptions import CannotDeleteEmployeeException
+from employees.exceptions import (
+    CannotDeleteEmployeeException,
+    EmployeeNotFoundException,
+)
 from employees.models import Employee
 from tenants.models import Client
 from tenants.services import ClientService
@@ -46,3 +51,11 @@ class EmployeeService(BaseService):
         instance.user.is_active = False
         instance.user.save(update_fields=["is_active"])
         instance.save(update_fields=["is_active"])
+
+    @staticmethod
+    def get_employee_by_user(user: User) -> Employee:
+        try:
+            employee = Employee.objects.get(user=user)
+        except Employee.DoesNotExist:
+            raise EmployeeNotFoundException()
+        return employee
