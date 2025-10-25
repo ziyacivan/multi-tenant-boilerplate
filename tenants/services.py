@@ -1,7 +1,6 @@
 from django.db import transaction
 
-from rest_framework.exceptions import APIException
-from tenant_users.tenants.models import DeleteError
+from django_tenants.utils import schema_context
 from tenant_users.tenants.tasks import provision_tenant
 
 from employees.choices import EmployeeRole
@@ -62,8 +61,9 @@ class ClientService(BaseService):
         tenant.short_name = short_name
         tenant.save()
 
-        employee_service = EmployeeService()
-        employee_service.create_object(user=owner, role=EmployeeRole.owner)
+        with schema_context(tenant.schema_name):
+            employee_service = EmployeeService()
+            employee_service.create_object(user=owner, role=EmployeeRole.owner)
         return tenant
 
     def update_object(self, instance: Client, **kwargs) -> Client:

@@ -27,6 +27,7 @@ class TenantTestCaseMixin:
     @classmethod
     def setUpClass(cls):
         cls._ensure_public_tenant_exists()
+        cls._cleanup_existing_test_tenant()
         super().setUpClass()
 
     @classmethod
@@ -46,6 +47,32 @@ class TenantTestCaseMixin:
                 owner=public_owner,
             )
             public_tenant.save()
+
+    @classmethod
+    def _cleanup_existing_test_tenant(cls):
+        """
+        Remove existing test tenant if it exists to prevent IntegrityError
+        when using --keepdb flag. This manually drops the schema and deletes
+        tenant records since tenant_users doesn't provide a delete function.
+        """
+        connection.set_schema_to_public()
+
+        if hasattr(cls, "get_test_schema_name"):
+            schema_name = cls.get_test_schema_name()
+        else:
+            schema_name = "test"
+
+        existing_tenant = Tenant.objects.filter(schema_name=schema_name).first()
+        if existing_tenant:
+            # Drop schema manually since auto_drop_schema is False
+            with connection.cursor() as cursor:
+                cursor.execute(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE')
+
+            # Delete domain first (foreign key constraint)
+            Domain.objects.filter(tenant=existing_tenant).delete()
+
+            # Force delete tenant by using queryset delete to bypass model's delete method
+            Tenant.objects.filter(pk=existing_tenant.pk).delete()
 
     @classmethod
     def setup_tenant(cls, tenant):
