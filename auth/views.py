@@ -57,7 +57,7 @@ class LoginView(views.APIView):
         return Response(
             tokens,
             status=status.HTTP_200_OK,
-            headers={"X-Related-Tenant": related_tenant.pk},
+            headers={"X-Related-Client": related_tenant.pk},
         )
 
 
