@@ -21,14 +21,6 @@ class Employee(BaseModel):
         choices=EmployeeRole.choices,
         default=EmployeeRole.employee,
     )
-    manager = models.ForeignKey(
-        "self",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name=_("manager"),
-        db_index=True,
-    )
     gender = models.CharField(
         _("gender"),
         max_length=20,
