@@ -255,7 +255,7 @@ class RegisterViewTestCase(TenantTestCaseMixin, TenantTestCase):
             user = baker.make(User, email="pending@example.com")
             user.set_password("password123")
             user.is_verified = False
-            user.verification_code = "123456"
+            user.set_verification_code("123456")
             user.verification_code_expires_at = timezone.now() + timezone.timedelta(
                 minutes=15
             )
@@ -320,7 +320,7 @@ class VerifyEmailViewTestCase(TenantTestCaseMixin, TenantTestCase):
             self.user.set_password("password123")
             self.user.is_verified = False
             self.user.is_active = False
-            self.user.verification_code = "ABC123"
+            self.user.set_verification_code("ABC123")
             self.user.verification_code_expires_at = (
                 timezone.now() + timezone.timedelta(minutes=15)
             )
@@ -450,7 +450,7 @@ class ResendVerificationEmailViewTestCase(TenantTestCaseMixin, TenantTestCase):
             self.user.set_password("password123")
             self.user.is_verified = False
             self.user.is_active = False
-            self.user.verification_code = "ABC123"
+            self.user.set_verification_code("ABC123")
             # Set expired verification code so resend is allowed
             self.user.verification_code_expires_at = (
                 timezone.now() - timezone.timedelta(minutes=1)

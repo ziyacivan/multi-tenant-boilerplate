@@ -29,6 +29,13 @@ class User(BaseModel, UserProfile):
         self.verification_code = hashed_code.decode("utf-8")
 
     def check_verification_code(self, raw_verification_code: str) -> bool:
-        return bcrypt.checkpw(
-            raw_verification_code.encode("utf-8"), self.verification_code.encode("utf-8")
-        )
+        if not self.verification_code:
+            return False
+
+        try:
+            return bcrypt.checkpw(
+                raw_verification_code.encode("utf-8"),
+                self.verification_code.encode("utf-8"),
+            )
+        except ValueError:
+            return False
