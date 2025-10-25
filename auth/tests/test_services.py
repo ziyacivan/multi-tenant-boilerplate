@@ -115,7 +115,7 @@ class AuthServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         user = baker.make(User, email="test@example.com")
         user.set_password("password")
         user.is_verified = False
-        user.verification_code = "123456"
+        user.set_verification_code("123456")
         user.verification_code_expires_at = timezone.now() + timezone.timedelta(
             minutes=15
         )
@@ -133,7 +133,7 @@ class AuthServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         user = baker.make(User, email="test@example.com")
         user.set_password("password")
         user.is_verified = False
-        user.verification_code = "123456"
+        user.set_verification_code("123456")
         user.verification_code_expires_at = timezone.now() + timezone.timedelta(
             minutes=15
         )
@@ -150,7 +150,7 @@ class AuthServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         user = baker.make(User, email="test@example.com")
         user.set_password("password")
         user.is_verified = False
-        user.verification_code = "123456"
+        user.set_verification_code("123456")
         user.verification_code_expires_at = timezone.now() + timezone.timedelta(
             minutes=15
         )
@@ -176,7 +176,7 @@ class AuthServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         user = baker.make(User, email="test@example.com")
         user.set_password("password")
         user.is_verified = False
-        user.verification_code = "123456"
+        user.set_verification_code("123456")
         # Set expired verification code
         user.verification_code_expires_at = timezone.now() - timezone.timedelta(
             minutes=1
@@ -213,7 +213,7 @@ class AuthServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         user = baker.make(User, email="test@example.com")
         user.set_password("password")
         user.is_verified = False
-        user.verification_code = "123456"
+        user.set_verification_code("123456")
         user.verification_code_expires_at = timezone.now() + timezone.timedelta(
             minutes=10
         )

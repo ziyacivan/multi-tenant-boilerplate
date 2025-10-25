@@ -1,3 +1,4 @@
+import bcrypt
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -20,3 +21,21 @@ class User(BaseModel, UserProfile):
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
+
+    def set_verification_code(self, raw_verification_code: str):
+        hashed_code = bcrypt.hashpw(
+            raw_verification_code.encode("utf-8"), bcrypt.gensalt()
+        )
+        self.verification_code = hashed_code.decode("utf-8")
+
+    def check_verification_code(self, raw_verification_code: str) -> bool:
+        if not self.verification_code:
+            return False
+
+        try:
+            return bcrypt.checkpw(
+                raw_verification_code.encode("utf-8"),
+                self.verification_code.encode("utf-8"),
+            )
+        except ValueError:
+            return False
