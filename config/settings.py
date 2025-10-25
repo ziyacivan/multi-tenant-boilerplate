@@ -42,6 +42,7 @@ TENANT_APPS = [
     "django.contrib.staticfiles",
     "tenant_users.permissions",
     "employees",
+    "titles",
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
