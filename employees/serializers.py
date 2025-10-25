@@ -16,7 +16,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
             "last_name",
             "photo",
             "role",
-            "manager",
             "gender",
             "is_active",
             "attributes",
