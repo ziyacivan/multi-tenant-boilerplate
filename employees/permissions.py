@@ -20,6 +20,19 @@ class IsMinimumManagerOrReadOnly(permissions.BasePermission):
         return employee_instance.role in [EmployeeRole.manager, EmployeeRole.owner]
 
 
+class IsMinimumManager(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+
+        try:
+            employee_instance = Employee.objects.only("role").get(user=request.user)
+        except Employee.DoesNotExist:
+            return False
+
+        return employee_instance.role in [EmployeeRole.manager, EmployeeRole.owner]
+
+
 class CanManagePersonalDetail(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
