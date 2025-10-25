@@ -80,16 +80,19 @@ class AuthService:
                 )
             raise UserAlreadyExistsException()
 
+        raw_verification_code = self._generate_verification_code()
+
         extra_fields = {
             "is_active": False,
-            "verification_code": self._generate_verification_code(),
             "verification_code_expires_at": timezone.now()
             + timedelta(minutes=self.VERIFICATION_CODE_EXPIRY_MINUTES),
         }
         user = User.objects.create_user(email=email, password=password, **extra_fields)
+        user.set_verification_code(raw_verification_code)
+        user.save(update_fields=["verification_code"])
 
         send_verification_email_task.delay(
-            email, user.verification_code, user.verification_code_expires_at
+            email, raw_verification_code, user.verification_code_expires_at
         )
         return True
 
@@ -102,7 +105,7 @@ class AuthService:
         """Check if verification code is valid."""
         return (
             user.verification_code
-            and user.verification_code == verification_code
+            and user.check_verification_code(verification_code)
             and user.verification_code_expires_at
             and timezone.now() <= user.verification_code_expires_at
         )
@@ -145,14 +148,15 @@ class AuthService:
         ):
             raise UserIsAlreadyInVerificationProcessException()
 
-        user.verification_code = self._generate_verification_code()
+        raw_verification_code = self._generate_verification_code()
+        user.set_verification_code(raw_verification_code)
         user.verification_code_expires_at = timezone.now() + timedelta(
             minutes=self.VERIFICATION_CODE_EXPIRY_MINUTES
         )
         user.save()
 
         send_verification_email_task.delay(
-            email, user.verification_code, user.verification_code_expires_at
+            email, raw_verification_code, user.verification_code_expires_at
         )
         return True
 
