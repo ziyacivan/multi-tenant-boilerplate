@@ -6,4 +6,5 @@ from titles.models import Title
 class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
-        fields = ["id", "name", "created_on", "updated_on"]
+        fields = ["id", "name", "attributes", "created_on", "updated_on"]
+        read_only_fields = ["is_active"]
