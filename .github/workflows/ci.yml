@@ -62,15 +62,11 @@ jobs:
       matrix:
         include:
           - module: auth
-            coverage_threshold: 70
-          - module: tenants
-            coverage_threshold: 0
-          - module: users
-            coverage_threshold: 0
+            coverage_threshold: 80
           - module: employees
-            coverage_threshold: 0
-          - module: utils
-            coverage_threshold: 0
+            coverage_threshold: 80
+          - module: titles
+            coverage_threshold: 95
 
     services:
       postgres:
