@@ -46,6 +46,7 @@ class ClientService(BaseService):
         domain.is_primary = True
         domain.save()
 
+        tenant.add_user(owner, is_superuser=True, is_staff=True)
         with schema_context(tenant.schema_name):
             employee_service = EmployeeService()
             employee_service.create_object(user=owner, role=EmployeeRole.owner)
