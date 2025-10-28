@@ -92,3 +92,18 @@ class TeamServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         instance.refresh_from_db()
 
         self.assertFalse(instance.is_active)
+
+    def test_create_object_with_parent(self):
+        parent_data = {
+            "name": "Parent Team",
+        }
+        parent_instance = self.service.create_object(**parent_data)
+        self.assertIsNotNone(parent_instance)
+
+        child_data = {
+            "name": "Child Team",
+            "parent": parent_instance,
+        }
+        child_instance = self.service.create_object(**child_data)
+        self.assertIsNotNone(child_instance)
+        self.assertEqual(child_instance.parent, parent_instance)
