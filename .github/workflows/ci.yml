@@ -67,6 +67,8 @@ jobs:
             coverage_threshold: 80
           - module: titles
             coverage_threshold: 95
+          - module: teams
+            coverage_threshold: 95
 
     services:
       postgres:
