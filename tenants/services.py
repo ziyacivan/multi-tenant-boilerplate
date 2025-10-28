@@ -14,22 +14,12 @@ from utils.interfaces import BaseService
 
 
 class ClientService(BaseService):
-    @transaction.atomic
     def create_object(
         self,
         name: str,
         description: str,
         slug: str,
         owner: User,
-        legal_name: str,
-        tax_no: str,
-        tax_office: str,
-        address: str,
-        invoice_address: str,
-        city: str,
-        country: str,
-        invoice_email_address: str,
-        short_name: str,
         **kwargs: dict,
     ) -> Client:
         from employees.services import EmployeeService
@@ -40,30 +30,26 @@ class ClientService(BaseService):
         if owner.tenants.count() > 1:
             raise UserAlreadyHaveCompanyException()
 
-        tenant, domain = provision_tenant(
-            tenant_name=name,
-            tenant_slug=slug,
+        tenant = Client(
+            schema_name="{slug}".format(slug=slug),
+            name=name,
+            description=description,
+            slug=slug,
             owner=owner,
-            is_staff=True,
-            is_superuser=True,
+            **kwargs,
         )
-        tenant: Client = tenant
-        tenant.description = description
-        tenant.domain_url = domain.domain
-        tenant.legal_name = legal_name
-        tenant.tax_no = tax_no
-        tenant.tax_office = tax_office
-        tenant.address = address
-        tenant.invoice_address = invoice_address
-        tenant.city = city
-        tenant.country = country
-        tenant.invoice_email_address = invoice_email_address
-        tenant.short_name = short_name
         tenant.save()
+
+        domain = Domain()
+        domain.domain = slug
+        domain.tenant = tenant
+        domain.is_primary = True
+        domain.save()
 
         with schema_context(tenant.schema_name):
             employee_service = EmployeeService()
             employee_service.create_object(user=owner, role=EmployeeRole.owner)
+
         return tenant
 
     def update_object(self, instance: Client, **kwargs) -> Client:
