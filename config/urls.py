@@ -4,11 +4,13 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from employees.views import EmployeeViewSet
+from teams.views import TeamViewSet
 from titles.views import TitleViewSet
 
 tenant_router = DefaultRouter()
 tenant_router.register(r"employees", EmployeeViewSet, basename="employee")
 tenant_router.register(r"titles", TitleViewSet, basename="title")
+tenant_router.register(r"teams", TeamViewSet, basename="team")
 
 urlpatterns = [
     path("admin/", admin.site.urls),

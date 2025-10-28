@@ -43,6 +43,7 @@ TENANT_APPS = [
     "tenant_users.permissions",
     "employees",
     "titles",
+    "teams",
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
