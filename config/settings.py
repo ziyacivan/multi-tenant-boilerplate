@@ -124,6 +124,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
+MULTITENANT_RELATIVE_MEDIA_ROOT = "%s/media"
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "mediafiles"
 
@@ -220,3 +222,6 @@ if IS_TESTING:
     PASSWORD_HASHERS = [
         "django.contrib.auth.hashers.MD5PasswordHasher",
     ]
+
+
+DEFAULT_FILE_STORAGE = "utils.storages.TenantFileSystemStorage"

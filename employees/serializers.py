@@ -5,6 +5,7 @@ from employees.models import Employee, PersonalDetail
 
 class EmployeeSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email", read_only=True)
+    photo = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Employee
