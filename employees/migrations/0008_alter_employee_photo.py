@@ -5,15 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('employees', '0007_remove_employee_manager'),
+        ("employees", "0007_remove_employee_manager"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='employee',
-            name='photo',
-            field=models.ImageField(blank=True, null=True, storage=utils.storages.TenantFileSystemStorage(), upload_to='employees/photos/', verbose_name='photo'),
+            model_name="employee",
+            name="photo",
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                storage=utils.storages.TenantFileSystemStorage(),
+                upload_to="employees/photos/",
+                verbose_name="photo",
+            ),
         ),
     ]
