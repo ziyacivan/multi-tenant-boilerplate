@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from employees.choices import EmployeeGender, EmployeeRole
 from users.models import User
 from utils.models import BaseModel
+from utils.storages import TenantFileSystemStorage
 
 
 class Employee(BaseModel):
@@ -13,7 +14,11 @@ class Employee(BaseModel):
     first_name = models.CharField(_("first name"), max_length=255)
     last_name = models.CharField(_("last name"), max_length=255)
     photo = models.ImageField(
-        _("photo"), upload_to="employees/photos/", null=True, blank=True
+        _("photo"),
+        upload_to="employees/photos/",
+        storage=TenantFileSystemStorage(),
+        null=True,
+        blank=True,
     )
     role = models.CharField(
         _("role"),
