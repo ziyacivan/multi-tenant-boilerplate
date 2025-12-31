@@ -249,7 +249,7 @@ class LoginViewTestCase(TestCase):
 
 ## Common Tasks
 
-### Yeni Bir Authentication Endpoint Eklemek
+### Adding a New Authentication Endpoint
 
 ```python
 # 1. Create serializer (serializers.py)
@@ -304,7 +304,7 @@ def test_new_auth_success(self):
     self.assertEqual(response.status_code, 200)
 ```
 
-### Yeni Bir Celery Task Eklemek
+### Adding a New Celery Task
 
 ```python
 # tasks.py
@@ -426,20 +426,20 @@ uv run python manage.py shell
 
 ## Common Pitfalls
 
-### ❌ YANLIŞ: User modelini doğrudan import etmek
+### ❌ WRONG: Directly importing User model
 
 ```python
-from users.models import User  # Circular import riski
+from users.models import User  # Circular import risk
 ```
 
-### ✅ DOĞRU: get_user_model kullanmak
+### ✅ CORRECT: Use get_user_model
 
 ```python
 from django.contrib.auth import get_user_model
 User = get_user_model()
 ```
 
-### ❌ YANLIŞ: Sync email gönderimi
+### ❌ WRONG: Synchronous email sending
 
 ```python
 def register(self, email, password):
@@ -447,7 +447,7 @@ def register(self, email, password):
     send_mail(...)  # Blocking operation
 ```
 
-### ✅ DOĞRU: Async Celery task
+### ✅ CORRECT: Async Celery task
 
 ```python
 def register(self, email, password):
@@ -455,24 +455,24 @@ def register(self, email, password):
     send_verification_email_task.delay(...)  # Non-blocking
 ```
 
-### ❌ YANLIŞ: Plain text verification code
+### ❌ WRONG: Plain text verification code
 
 ```python
 user.verification_code = "ABC123"  # Plain text
 ```
 
-### ✅ DOĞRU: Hashed verification code
+### ✅ CORRECT: Hashed verification code
 
 ```python
-user.set_verification_code("ABC123")  # Hash'lenerek saklanır
+user.set_verification_code("ABC123")  # Stored as hash
 ```
 
 ## Dependencies
 
-Bu modül şu modüllere bağımlıdır:
+This module depends on:
 
-- **users:** User modeli ve user management
-- **tenants:** Client modeli (login response'da tenant bilgisi)
+- **users:** User model and user management
+- **tenants:** Client model (tenant information in login response)
 - **utils:** BaseService, custom exceptions, EmailService
 
 Modules that use this module:

@@ -578,7 +578,7 @@ Modules that use this module:
 
 ## API Schema
 
-Otomatik API dokümantasyonu:
+Automatic API documentation:
 
 ```bash
 # Swagger UI

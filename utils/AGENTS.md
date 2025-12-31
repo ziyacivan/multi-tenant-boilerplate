@@ -538,33 +538,33 @@ class EmailServiceTestCase(TestCase):
 
 ## Common Tasks
 
-### Yeni Bir BaseException Eklemek
+### Adding a New BaseException
 
 ```python
 # utils/exceptions.py
 class ResourceLockedException(BaseAPIException):
     """
-    Kaynak kilitli olduğunda fırlatılır.
+    Raised when resource is locked.
     """
     default_detail = "Resource is locked."
     default_code = "resource_locked"
     status_code = 423  # HTTP 423 Locked
 
-# Kullanım
+# Usage
 def update_resource(resource):
     if resource.is_locked:
         raise ResourceLockedException()
     # Update logic
 ```
 
-### Yeni Bir Test Mixin Eklemek
+### Adding a New Test Mixin
 
 ```python
 # utils/tests/mixins.py
 class AdminTenantTestMixin(AuthenticatedTenantTestMixin):
     """
-    Admin testleri için mixin.
-    Otomatik olarak admin user ile authenticate eder.
+    Mixin for admin tests.
+    Automatically authenticates with admin user.
     """
     
     def setUp(self):
@@ -572,7 +572,7 @@ class AdminTenantTestMixin(AuthenticatedTenantTestMixin):
         self.authenticate_as_admin()
     
     def authenticate_as_admin(self):
-        """Admin user ile authenticate eder."""
+        """Authenticates with admin user."""
         user = self.create_test_user(
             email="admin@test.com",
             is_staff=True,
@@ -584,15 +584,15 @@ class AdminTenantTestMixin(AuthenticatedTenantTestMixin):
         
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._auth_token}")
 
-# Kullanım
+# Usage
 class AdminViewTestCase(AdminTenantTestMixin, TenantTestCase):
     def test_admin_action(self):
-        # Otomatik admin authentication
+        # Automatic admin authentication
         response = self.get("/api/admin-endpoint/")
         self.assertEqual(response.status_code, 200)
 ```
 
-### BaseModel'e Ortak Field Eklemek
+### Adding a Common Field to BaseModel
 
 ```python
 # utils/models.py
@@ -601,7 +601,7 @@ class BaseModel(models.Model):
     updated_on = models.DateTimeField(_("updated on"), auto_now=True)
     attributes = models.JSONField(_("attributes"), default=dict, blank=True)
     
-    # Yeni ortak field
+    # New common field
     is_deleted = models.BooleanField(
         _("is deleted"),
         default=False,
@@ -613,16 +613,16 @@ class BaseModel(models.Model):
         abstract = True
     
     def soft_delete(self):
-        """Soft delete işlemi yapar."""
+        """Performs soft delete operation."""
         self.is_deleted = True
         self.save(update_fields=["is_deleted"])
     
     def restore(self):
-        """Soft delete'i geri alır."""
+        """Restores from soft delete."""
         self.is_deleted = False
         self.save(update_fields=["is_deleted"])
 
-# Tüm modeller otomatik olarak bu field'ı alır
+# All models automatically get this field
 ```
 
 ## Security Considerations
@@ -630,12 +630,12 @@ class BaseModel(models.Model):
 ### 1. Exception Detail Exposure
 
 ```python
-# ❌ YANLIŞ: Sensitive data expose etme
+# ❌ WRONG: Exposing sensitive data
 class InvalidPasswordException(BaseAPIException):
     def __init__(self, attempted_password):
-        self.detail = f"Invalid password: {attempted_password}"  # Güvenlik riski
+        self.detail = f"Invalid password: {attempted_password}"  # Security risk
 
-# ✅ DOĞRU: Generic message
+# ✅ CORRECT: Generic message
 class InvalidPasswordException(BaseAPIException):
     default_detail = "Invalid credentials."
     default_code = "invalid_credentials"
@@ -720,7 +720,7 @@ from employees.models import Employee  # Circular import risk
 
 ```python
 # employees/services.py
-from utils.interfaces import BaseService  # ✅ Doğru yön
+from utils.interfaces import BaseService  # ✅ Correct direction
 ```
 
 ### ❌ WRONG: Using BaseModel directly

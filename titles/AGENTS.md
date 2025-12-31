@@ -64,7 +64,7 @@ class Title(BaseModel):  # BaseModel: created_on, updated_on, attributes
 
 ### 2. TitleService (`services.py`)
 
-Minimal business logic, sadece temel CRUD.
+Minimal business logic, only basic CRUD.
 
 ```python
 class TitleService(BaseService):
@@ -224,11 +224,11 @@ titles = Title.objects.filter(is_active=True).order_by("-created_on")  # Newest 
 
 ### Test Coverage Target: 95%
 
-**Yüksek coverage hedefi nedenleri:**
-- ✅ Basit model yapısı
+**Reasons for high coverage target:**
+- ✅ Simple model structure
 - ✅ Minimal business logic
-- ✅ Az bağımlılık
-- ✅ Kolay test edilebilir
+- ✅ Low dependencies
+- ✅ Easy to test
 
 ### Service Tests (`test_services.py`)
 
@@ -352,10 +352,10 @@ class TitleViewSetTestCase(AuthenticatedTenantTestMixin, TenantTestCase):
 
 ## Common Tasks
 
-### Yeni Bir Title Field Eklemek
+### Adding a New Title Field
 
 ```python
-# 1. Model'e field ekle (models.py)
+# 1. Add field to model (models.py)
 class Title(BaseModel):
     name = models.CharField(max_length=255, unique=True, db_index=True)
     is_active = models.BooleanField(default=True)
@@ -396,7 +396,7 @@ def test_create_with_description(self):
     self.assertEqual(title.description, "Develops software applications")
 ```
 
-### Search/Filter Endpoint Eklemek
+### Adding Search/Filter Endpoint
 
 ```python
 # views.py
@@ -409,10 +409,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def search(self, request):
         """
-        Title ara.
+        Search titles.
         
         Query params:
-        - q: Arama terimi (name içinde arar)
+        - q: Search term (searches in name)
         """
         query = request.query_params.get("q", "")
         
@@ -424,7 +424,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(titles, many=True)
         return Response(serializer.data)
 
-# Kullanım
+# Usage
 # GET /api/titles/search/?q=engineer
 ```
 
@@ -440,7 +440,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"])
     def bulk_create(self, request):
         """
-        Birden fazla title oluştur.
+        Create multiple titles.
         
         Request body:
         {
@@ -463,7 +463,7 @@ class TitleViewSet(viewsets.ModelViewSet):
             "errors": errors
         }, status=status.HTTP_201_CREATED)
 
-# Kullanım
+# Usage
 # POST /api/titles/bulk_create/
 # {"titles": ["Software Engineer", "HR Manager", "Designer"]}
 ```
@@ -513,20 +513,20 @@ permission_classes = [IsAuthenticated]
 title = Title.objects.create(name="Engineer")  # DoesNotExist
 ```
 
-### ✅ DOĞRU: Tenant context kullan
+### ✅ CORRECT: Use tenant context
 
 ```python
 with tenant_context(tenant):
     title = Title.objects.create(name="Engineer")
 ```
 
-### ❌ YANLIŞ: Duplicate name kontrolü yapmadan create
+### ❌ WRONG: Creating without duplicate name check
 
 ```python
 title = Title.objects.create(name="Engineer")  # IntegrityError
 ```
 
-### ✅ DOĞRU: try-except kullan
+### ✅ CORRECT: Use try-except
 
 ```python
 try:
@@ -536,13 +536,13 @@ except IntegrityError:
     pass
 ```
 
-### ❌ YANLIŞ: Hard delete
+### ❌ WRONG: Hard delete
 
 ```python
-title.delete()  # Veri kaybı
+title.delete()  # Data loss
 ```
 
-### ✅ DOĞRU: Soft delete
+### ✅ CORRECT: Soft delete
 
 ```python
 service.delete_object(title)  # is_active=False
@@ -551,7 +551,7 @@ service.delete_object(title)  # is_active=False
 ## Quick Commands
 
 ```bash
-# Test çalıştır
+# Run tests
 uv run python manage.py test titles
 
 # Coverage ile test (Target: 95%)
@@ -561,7 +561,7 @@ uv run coverage report -m
 # Belirli bir test
 uv run python manage.py test titles.tests.test_services.TitleServiceTestCase.test_create_object_success
 
-# Migration oluştur
+# Create migration
 uv run python manage.py makemigrations titles
 
 # Migration uygula (tenant-aware)
@@ -580,18 +580,18 @@ uv run python manage.py shell
 
 ## Dependencies
 
-Bu modül şu modüllere bağımlıdır:
+This module depends on:
 
-- **tenants:** Client modeli (tenant context)
+- **tenants:** Client model (tenant context)
 - **utils:** BaseModel, BaseService
 
-Bu modülü kullanan modüller:
+Modules that use this module:
 
-- **employees:** (Future) Employee'lere title atanabilir
+- **employees:** (Future) Titles can be assigned to employees
 
 ## Future Enhancements
 
-Planlanan özellikler:
+Planned features:
 
 1. **Employee-Title Relationship:**
 ```python
@@ -622,7 +622,7 @@ COMMON_TITLES = [
 
 ## API Schema
 
-Otomatik API dokümantasyonu:
+Automatic API documentation:
 
 ```bash
 # Swagger UI

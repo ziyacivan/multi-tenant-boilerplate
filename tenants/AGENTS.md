@@ -82,7 +82,7 @@ class Domain(DomainMixin):
 
 ### 2. ClientService (`services.py`)
 
-**Metodlar:**
+**Methods:**
 ```python
 @transaction.atomic
 def create_object(
@@ -302,12 +302,12 @@ from tenants.models import Client, Domain
 class TenantServiceTestCase(TenantTestCase):
     @classmethod
     def setUpClass(cls):
-        # Public tenant'ı oluştur (sistem tenant'ı)
+        # Create public tenant (system tenant)
         super().setUpClass()
     
     def setUp(self):
         super().setUp()
-        # Test tenant otomatik oluşturulur
+        # Test tenant is automatically created
         # cls.tenant -> Test tenant
         # cls.domain -> Test domain
 ```
@@ -348,7 +348,7 @@ class ClientServiceTestCase(TenantTestCase):
         self.assertEqual(tenant.slug, "testco")
         self.assertEqual(tenant.owner, owner)
         
-        # Schema oluşturuldu mu?
+        # Was schema created?
         self.assertTrue(
             Client.objects.filter(schema_name="testco").exists()
         )
@@ -366,14 +366,14 @@ class ClientServiceTestCase(TenantTestCase):
 
 ## Common Tasks
 
-### Yeni Bir Tenant Field Eklemek
+### Adding a New Tenant Field
 
 ```python
-# 1. Model'e field ekle (models.py)
+# 1. Add field to model (models.py)
 class Client(BaseModel, TenantBase):
     # ...
     phone_number = models.CharField(
-        _("telefon numarası"),
+        _("phone number"),
         max_length=20,
         blank=True
     )
@@ -419,7 +419,7 @@ class Command(BaseCommand):
                 f"  - {tenant.name} ({tenant.slug}): {status}"
             )
 
-# Kullanım
+# Usage
 uv run python manage.py list_tenants
 ```
 
@@ -429,14 +429,14 @@ uv run python manage.py list_tenants
 # Shared apps (public schema)
 uv run python manage.py migrate_schemas --shared
 
-# Tenant apps (tüm tenant schema'lar)
+# Tenant apps (all tenant schemas)
 uv run python manage.py migrate_schemas
 
-# Belirli bir tenant için
+# For specific tenant
 uv run python manage.py migrate_schemas --schema=evilcorp
 
-# Yeni tenant oluşturulduğunda
-# provision_tenant() otomatik migrate yapar
+# When new tenant is created
+# provision_tenant() automatically runs migrations
 ```
 
 ## Security Considerations
@@ -510,22 +510,22 @@ cursor.execute("CREATE SCHEMA evilcorp")  # Migrations won't run
 tenant, domain = provision_tenant("Evil Corp", "evilcorp", owner)
 ```
 
-### ❌ YANLIŞ: Normal migrate komutu
+### ❌ WRONG: Normal migrate command
 
 ```bash
-uv run python manage.py migrate  # Sadece default schema
+uv run python manage.py migrate  # Only default schema
 ```
 
-### ✅ DOĞRU: migrate_schemas kullan
+### ✅ CORRECT: Use migrate_schemas
 
 ```bash
-uv run python manage.py migrate_schemas  # Tüm tenant schema'lar
+uv run python manage.py migrate_schemas  # All tenant schemas
 ```
 
 ## Quick Commands
 
 ```bash
-# Public tenant oluştur (ilk kurulum)
+# Create public tenant (initial setup)
 uv run python manage.py shell
 >>> from tenant_users.tenants.utils import create_public_tenant
 >>> create_public_tenant(domain_url="localhost", owner_email="admin@localhost.com")
@@ -550,19 +550,19 @@ uv run python manage.py tenant_command shell --schema=evilcorp
 
 ## Dependencies
 
-Bu modül şu modüllere bağımlıdır:
+This module depends on:
 
 - **django-tenants:** Multi-tenancy framework
 - **tenant-users:** User-tenant relationship
-- **users:** User modeli (owner)
-- **employees:** Employee oluşturma (owner)
+- **users:** User model (owner)
+- **employees:** Employee creation (owner)
 - **utils:** BaseModel, BaseService
 
-Bu modülü kullanan modüller:
+Modules that use this module:
 
-- **employees:** Tenant context için
-- **titles:** Tenant context için
-- **auth:** Login response'da tenant bilgisi
+- **employees:** For tenant context
+- **titles:** For tenant context
+- **auth:** Tenant information in login response
 
 ## Middleware Configuration
 
@@ -584,7 +584,7 @@ ROOT_URLCONF = "config.urls"  # Tenant routes
 
 ## API Schema
 
-Otomatik API dokümantasyonu:
+Automatic API documentation:
 
 ```bash
 # Swagger UI

@@ -383,8 +383,8 @@ docker-compose down -v
 Additional documentation is available in the `docs/` directory:
 
 - [Setup Guide](docs/setup.md)
-- [Multi-Tenant Architecture](docs/tenantlar.md)
-- [Migrations Guide](docs/migrationlar.md)
+- [Multi-Tenant Architecture](docs/tenants.md)
+- [Migrations Guide](docs/migrations.md)
 - [Docker Deployment](docs/docker.md)
 - [CI Pipeline](docs/ci-pipeline.md)
 - [Create Company Flow](docs/flows/create_company.md)
@@ -456,7 +456,7 @@ This project is licensed under the terms specified in the LICENSE file.
 
 ## 👥 Authors
 
-- Your Name - Initial work
+- Yusuf Ziya CIVAN - yusufziyacivan@gmail.com
 
 ## 🙏 Acknowledgments
 
