@@ -1,98 +1,113 @@
-# CI/CD Pipeline Dokümantasyonu
+# CI/CD Pipeline Documentation
 
-Bu doküman, projenin GitHub Actions CI/CD pipeline yapısını açıklar.
+This document describes the GitHub Actions CI/CD pipeline structure for the project.
 
-## Genel Bakış
+## Overview
 
-HRM API projesi için otomatik test ve kod kalitesi kontrolü sağlayan bir CI/CD pipeline sistemi kurulmuştur. Pipeline, aşağıdaki durumlarda otomatik olarak çalışır:
+An automated testing and code quality control CI/CD pipeline system has been set up for the HRM API project. The pipeline runs automatically in the following cases:
 
-- `master` branch'ına yapılan her push işleminde
-- `master` branch'ına yönelik her pull request açıldığında veya güncellendiğinde
-- Pull request'lerin `master` branch'ına merge edilmesi sırasında
+- On every push to the `master` branch
+- When a pull request is opened or updated targeting the `master` branch
+- During merge of pull requests into the `master` branch
 
-## Pipeline İşleri (Jobs)
+## Pipeline Jobs
 
-Pipeline **paralel çalışan** işler içerir: **Formatting Check** ve **Modül Bazlı Test Jobs**
+The pipeline contains **parallel running jobs**: **Formatting Check** and **Module-Based Test Jobs**
 
 ### 1. Code Formatting Check
 
-**Amaç:** Kod formatlaması ve import sıralamasının standartlara uygun olup olmadığını kontrol eder.
+**Purpose:** Checks if code formatting and import ordering comply with standards.
 
-**Kullanılan Araçlar:**
-- **black**: Python kod formatlayıcı (PEP 8 uyumlu)
-- **isort**: Import ifadelerini alfabetik ve kategorik olarak düzenler
+**Tools Used:**
+- **black**: Python code formatter (PEP 8 compliant)
+- **isort**: Organizes import statements alphabetically and categorically
 
-**Kontroller:**
+**Checks:**
 ```bash
-black --check --diff .
-isort --check-only --diff .
+uv format --check
 ```
 
-**Başarısızlık Durumu:** Kod formatı kurallara uygun değilse pipeline başarısız olur.
+This runs both `black --check` and `isort --check-only` with the project's configuration.
 
-### 2. Modül Bazlı Test Jobs (Paralel)
+**Failure Condition:** Pipeline fails if code format does not comply with rules.
 
-**Amaç:** Her Django modülünü ayrı ayrı test eder ve modül bazlı coverage limitleri uygular.
+### 2. Module-Based Test Jobs (Parallel)
 
-**Modüller ve Coverage Limitleri:**
-- **auth**: %85 (kritik güvenlik modülü)
-- **tenants**: %80 (çok kiracılı mimari)
-- **users**: %75 (temel kullanıcı yönetimi)
-- **employees**: %80 (iş süreçleri)
-- **utils**: %90 (yardımcı fonksiyonlar)
+**Purpose:** Tests each Django module separately and applies module-based coverage limits.
 
-**Servisler:**
-- Her job için ayrı PostgreSQL 15 container
+**Modules and Coverage Limits:**
+- **auth**: 85% (critical security module)
+- **tenants**: 80% (multi-tenant architecture)
+- **users**: 75% (basic user management)
+- **employees**: 80% (business processes)
+- **titles**: 95% (job titles management)
+- **utils**: 90% (helper functions)
 
-**Test Süreci (Her Modül İçin):**
-1. PostgreSQL servisinin hazır olması beklenir
-2. Django test ortamı için `.env` dosyası oluşturulur
-3. Sadece ilgili modül testleri çalıştırılır: `coverage run --source='MODULE' manage.py test MODULE --keepdb`
-4. Modül bazlı coverage raporu oluşturulur ve belirlenen minimum kontrol edilir
-5. Coverage raporu GitHub Actions artifacts'a yüklenir
+**Services:**
+- Separate PostgreSQL 15 container for each job
 
-**Paralel Çalışma:**
-- Tüm test job'ları `formatting` job'ı tamamlandıktan sonra **paralel** olarak başlar
-- Her job farklı runner'da çalışır
-- Toplam pipeline süresi: en yavaş job'ın süresi
+**Test Process (For Each Module):**
+1. Wait for PostgreSQL service to be ready
+2. Create `.env` file for Django test environment
+3. Run only relevant module tests: `coverage run --source='MODULE' manage.py test MODULE --keepdb`
+4. Generate module-based coverage report and check against minimum threshold
+5. Upload coverage report to GitHub Actions artifacts
+
+**Parallel Execution:**
+- All test jobs start **in parallel** after the `formatting` job completes
+- Each job runs on a different runner
+- Total pipeline time: duration of the slowest job
 
 ### 3. Test Summary
 
-**Amaç:** Tüm modül coverage raporlarını birleştirir ve genel özet oluşturur.
+**Purpose:** Combines all module coverage reports and creates a general summary.
 
-**Süreç:**
-1. Tüm modül coverage raporları indirilir
-2. Coverage raporları birleştirilir
-3. Genel coverage raporu oluşturulur
-4. Pull request'lerde coverage raporu yorum olarak eklenir
+**Process:**
+1. Download all module coverage reports
+2. Combine coverage reports
+3. Generate general coverage report
+4. Add coverage report as a comment on pull requests
 
-**Başarısızlık Durumu:** 
-- Herhangi bir modül testi başarısız olursa
-- Herhangi bir modül coverage'ı belirlenen limitin altına düşerse
+**Failure Conditions:**
+- Any module test fails
+- Any module coverage falls below the specified limit
 
-## Konfigürasyon
+## Configuration
 
 ### pyproject.toml
 
-Proje kök dizinindeki `pyproject.toml` dosyasında tüm araçlar için yapılandırma bulunur:
+Configuration for all tools is found in the `pyproject.toml` file in the project root:
 
-#### Black Ayarları
+#### Black Settings
 ```toml
 [tool.black]
 line-length = 88
 target-version = ['py313']
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | \.uv
+  | __pycache__
+  | migrations
+  | staticfiles
+  | mediafiles
+)/
+'''
 ```
 
-#### isort Ayarları
+#### isort Settings
 ```toml
 [tool.isort]
 profile = "black"
 line_length = 88
+skip_glob = ["*/migrations/*", "staticfiles/*", "mediafiles/*"]
 known_django = ["django"]
 known_first_party = ["auth", "config", "employees", "tenants", "users", "utils"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 ```
 
-#### Coverage Ayarları
+#### Coverage Settings
 ```toml
 [tool.coverage.run]
 source = ["."]
@@ -102,173 +117,222 @@ omit = [
     "*/test_*.py",
     "*/__pycache__/*",
     "manage.py",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/.uv/*",
+    "config/wsgi.py",
+    "config/asgi.py",
 ]
 
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
+    "raise AssertionError",
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
 ]
 ```
 
-## Yerel Geliştirme
+## Local Development
 
-### Formatters'ı Yükleme
+### Installing Formatters
+
+```bash
+# Install dev dependencies (includes formatters)
+uv sync --extra dev
+```
+
+Or install individually:
 
 ```bash
 uv pip install black isort coverage
 ```
 
-veya dev dependencies ile:
+### Code Formatting
+
+Before committing your code, format it:
 
 ```bash
-uv sync --extra dev
+# Format all code (recommended)
+uv format
+
+# Or format individually
+uv run black .
+uv run isort .
 ```
 
-### Kod Formatlaması
+### Checking Format
 
-Kodunuzu commit etmeden önce formatlamak için:
+To test the checks that will run in CI locally:
 
 ```bash
-# Tüm kodu formatla
-black .
+# Check formatting (CI command)
+uv format --check
 
-# Import'ları düzenle
-isort .
+# Or check individually
+uv run black --check --diff .
+uv run isort --check-only --diff .
 ```
 
-### Formatı Kontrol Etme
+### Running Tests with Coverage
 
-CI'da çalışacak kontrolleri yerel olarak test etmek için:
+#### Testing All Modules
 
 ```bash
-# Black kontrolü
-black --check --diff .
-
-# isort kontrolü
-isort --check-only --diff .
-```
-
-### Testleri Coverage ile Çalıştırma
-
-#### Tüm Modülleri Test Etme
-```bash
-# Dev dependencies'leri kur (coverage dahil)
+# Install dev dependencies (coverage included)
 uv sync --extra dev
 
-# Tüm testleri coverage ile çalıştır
+# Run all tests with coverage
 uv run coverage run manage.py test --keepdb
 
-# Genel coverage raporunu görüntüle
+# View general coverage report
 uv run coverage report
 
-# Detaylı HTML rapor oluştur
+# Generate detailed HTML report
 uv run coverage html
-# Rapor: htmlcov/index.html
+# Report: htmlcov/index.html
 ```
 
-#### Modül Bazlı Test Etme (CI'daki gibi)
+#### Module-Based Testing (Like CI)
+
 ```bash
-# Auth modülü (85% minimum)
+# Auth module (85% minimum)
 uv run coverage run --source='auth' manage.py test auth --keepdb
 uv run coverage report --fail-under=85
 
-# Tenants modülü (80% minimum)
+# Tenants module (80% minimum)
 uv run coverage run --source='tenants' manage.py test tenants --keepdb
 uv run coverage report --fail-under=80
 
-# Users modülü (75% minimum)
+# Users module (75% minimum)
 uv run coverage run --source='users' manage.py test users --keepdb
 uv run coverage report --fail-under=75
 
-# Employees modülü (80% minimum)
+# Employees module (80% minimum)
 uv run coverage run --source='employees' manage.py test employees --keepdb
 uv run coverage report --fail-under=80
 
-# Utils modülü (90% minimum)
+# Titles module (95% minimum)
+uv run coverage run --source='titles' manage.py test titles --keepdb
+uv run coverage report --fail-under=95
+
+# Utils module (90% minimum)
 uv run coverage run --source='utils' manage.py test utils --keepdb
 uv run coverage report --fail-under=90
 ```
 
-## Pipeline Sonuçlarını Görüntüleme
+## Viewing Pipeline Results
 
-1. GitHub repository'nizde **Actions** sekmesine gidin
-2. İlgili workflow çalıştırmasını seçin
-3. Her job'un detaylarını ve loglarını inceleyebilirsiniz
-4. Coverage raporunu **Artifacts** bölümünden indirebilirsiniz
+1. Go to the **Actions** tab in your GitHub repository
+2. Select the relevant workflow run
+3. You can review details and logs of each job
+4. Download coverage report from the **Artifacts** section
 
 ## Pull Request Workflow
 
-1. Feature branch'inde çalışın
-2. Commit etmeden önce `black .` ve `isort .` komutlarını çalıştırın
-3. Pull request açın
-4. CI pipeline otomatik olarak çalışır:
-   - Formatting kontrolü yapılır
-   - Testler çalıştırılır ve coverage kontrol edilir
-5. Pipeline başarılı olursa PR merge edilebilir
-6. Coverage raporu PR'a yorum olarak eklenir
+1. Work on a feature branch
+2. Before committing, run `uv format` commands
+3. Open a pull request
+4. CI pipeline runs automatically:
+   - Formatting check is performed
+   - Tests are run and coverage is checked
+5. If pipeline succeeds, PR can be merged
+6. Coverage report is added as a comment to the PR
 
-## Sorun Giderme
+## Troubleshooting
 
-### Formatting Hataları
+### Formatting Errors
 
-Pipeline'da formatting hatası alırsanız:
+If you get a formatting error in the pipeline:
 
 ```bash
-# Yerel olarak formatla
-black .
-isort .
+# Format locally
+uv format
 
-# Değişiklikleri commit et
+# Commit changes
 git add .
 git commit -m "Fix formatting"
 git push
 ```
 
-### Coverage Düşük
+### Low Coverage
 
-Coverage %80'in altındaysa:
+If coverage is below the threshold:
 
-1. Hangi dosyaların coverage'ı düşük olduğunu kontrol edin:
+1. Check which files have low coverage:
    ```bash
    uv run coverage report
    ```
 
-2. Eksik testleri yazın
+2. Write missing tests
 
-3. Coverage HTML raporunu inceleyin:
+3. Review coverage HTML report:
    ```bash
    uv run coverage html
    open htmlcov/index.html
    ```
 
-### Test Hataları
+### Test Failures
 
-Testler başarısız olursa:
+If tests fail:
 
-1. Yerel ortamda testleri çalıştırın:
+1. Run tests locally:
    ```bash
-   python manage.py test
+   uv run python manage.py test
    ```
 
-2. Hataları düzeltin
+2. Fix errors
 
-3. Commit ve push edin
+3. Commit and push
+
+### Module-Specific Issues
+
+If a specific module's tests fail:
+
+```bash
+# Run only that module's tests
+uv run python manage.py test <module_name>
+
+# With coverage
+uv run coverage run --source='<module_name>' manage.py test <module_name>
+uv run coverage report
+```
 
 ## Best Practices
 
-1. **Her commit'ten önce formatlanmış kod:** `black .` ve `isort .` çalıştırın
-2. **Testleri yerel olarak çalıştırın:** Push etmeden önce testlerin geçtiğinden emin olun
-3. **Coverage'ı takip edin:** Yeni kod yazarken test yazmayı unutmayın
-4. **Migration dosyalarını commit edin:** Migration dosyaları coverage'dan hariç tutulmuştur
-5. **CI loglarını inceleyin:** Pipeline başarısız olursa detaylı logları okuyun
+1. **Formatted code before every commit:** Run `uv format` before committing
+2. **Run tests locally:** Make sure tests pass before pushing
+3. **Track coverage:** Don't forget to write tests when writing new code
+4. **Commit migration files:** Migration files are excluded from coverage
+5. **Review CI logs:** Read detailed logs if pipeline fails
+6. **Keep coverage high:** Aim to maintain or improve coverage percentages
+7. **Test edge cases:** Write tests for both success and failure scenarios
 
-## Faydalı Linkler
+## Coverage Targets Summary
+
+| Module | Target | Reason |
+|--------|--------|--------|
+| auth | 85% | Critical security module |
+| tenants | 80% | Multi-tenant architecture |
+| users | 75% | Basic user management |
+| employees | 80% | Business processes |
+| titles | 95% | Simple CRUD operations |
+| utils | 90% | Helper functions used everywhere |
+
+## Pipeline Performance
+
+- **Formatting Check:** ~30 seconds
+- **Module Tests (Parallel):** ~3-5 minutes (longest job)
+- **Total Pipeline Time:** ~4-6 minutes
+
+## Useful Links
 
 - [Black Documentation](https://black.readthedocs.io/)
 - [isort Documentation](https://pycqa.github.io/isort/)
 - [Coverage.py Documentation](https://coverage.readthedocs.io/)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
-
+- [uv Documentation](https://github.com/astral-sh/uv)
