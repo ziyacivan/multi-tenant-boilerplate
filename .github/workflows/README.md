@@ -1,67 +1,83 @@
 # GitHub Actions Workflows
 
-Bu dizin, projenin GitHub Actions CI/CD pipeline'larını içerir.
+This directory contains the GitHub Actions CI/CD pipelines for the project.
 
-## Mevcut Workflow'lar
+## Available Workflows
 
 ### ci.yml - CI Pipeline
 
-**Tetikleyiciler:**
-- `master` branch'ına push
-- `master` branch'ına pull request
+**Triggers:**
+- Push to `master` branch
+- Pull request to `master` branch
 
-**İşler:**
-1. **Code Formatting Check** - Black ve isort ile kod formatı kontrolü
-2. **Modül Bazlı Test Jobs** (Paralel):
-   - **Test Auth Module** - Auth modülü testleri (%85 coverage)
-   - **Test Tenants Module** - Tenants modülü testleri (%80 coverage)
-   - **Test Users Module** - Users modülü testleri (%75 coverage)
-   - **Test Employees Module** - Employees modülü testleri (%80 coverage)
-   - **Test Utils Module** - Utils modülü testleri (%90 coverage)
-3. **Test Summary** - Tüm coverage raporlarını birleştirir
+**Jobs:**
+1. **Code Formatting Check** - Code format check with Black and isort
+2. **Module-Based Test Jobs** (Parallel):
+   - **Test Auth Module** - Auth module tests (85% coverage)
+   - **Test Tenants Module** - Tenants module tests (80% coverage)
+   - **Test Users Module** - Users module tests (75% coverage)
+   - **Test Employees Module** - Employees module tests (80% coverage)
+   - **Test Utils Module** - Utils module tests (90% coverage)
+   - **Test Titles Module** - Titles module tests (95% coverage)
+3. **Test Summary** - Combines all coverage reports
 
-**Detaylı bilgi:** [CI Pipeline Dokümantasyonu](../../docs/ci-pipeline.md)
+**Detailed information:** [CI Pipeline Documentation](../../docs/ci-pipeline.md)
 
-## Yerel Kullanım
+## Local Usage
 
-### Formatters'ı Kur
+### Install Formatters
 ```bash
 uv sync --extra dev
 ```
 
-### Kod Formatla (CI'dan önce çalıştır)
+### Format Code (Run before CI)
 ```bash
+uv format
+# Or individually:
 black .
 isort .
 ```
 
-### Kontrolleri Çalıştır
+### Run Checks
 ```bash
-# Formatting kontrolü
+# Formatting check
+uv format --check
+# Or individually:
 black --check --diff .
 isort --check-only --diff .
 
-# Tüm testler ve genel coverage
+# All tests and general coverage
 uv run coverage run manage.py test --keepdb
 uv run coverage report
 
-# Modül bazlı testler (CI'daki gibi)
+# Module-based tests (like in CI)
 uv run coverage run --source='auth' manage.py test auth --keepdb
 uv run coverage report --fail-under=85
 
 uv run coverage run --source='tenants' manage.py test tenants --keepdb
 uv run coverage report --fail-under=80
 
-# ... diğer modüller için benzer şekilde
+uv run coverage run --source='users' manage.py test users --keepdb
+uv run coverage report --fail-under=75
+
+uv run coverage run --source='employees' manage.py test employees --keepdb
+uv run coverage report --fail-under=80
+
+uv run coverage run --source='titles' manage.py test titles --keepdb
+uv run coverage report --fail-under=95
+
+uv run coverage run --source='utils' manage.py test utils --keepdb
+uv run coverage report --fail-under=90
+
+# ... similarly for other modules
 ```
 
-## Sorun Giderme
+## Troubleshooting
 
-Pipeline başarısız olursa:
+If the pipeline fails:
 
-1. **Formatting hatası:** Yerel olarak `black .` ve `isort .` çalıştırın
-2. **Test hatası:** `python manage.py test` ile yerel testleri çalıştırın
-3. **Coverage düşük:** `coverage html` ile detaylı rapor oluşturun
+1. **Formatting error:** Run `uv format` locally (or `black .` and `isort .`)
+2. **Test error:** Run local tests with `python manage.py test`
+3. **Low coverage:** Generate detailed report with `coverage html`
 
-Daha fazla bilgi için [CI Pipeline Dokümantasyonu](../../docs/ci-pipeline.md)'na bakın.
-
+For more information, see the [CI Pipeline Documentation](../../docs/ci-pipeline.md).

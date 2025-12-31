@@ -2,59 +2,60 @@
 applyTo: '**'
 ---
 ## Copilot Instructions
-Bu dosya, GitHub Copilot'un bu proje (HRM API) için kod önerileri üretirken uyması gereken kuralları ve standartları tanımlar. Copilot, bu talimatları kullanarak tutarlı, kaliteli ve proje standartlarına uygun kod önerileri sunmalıdır.
+This file defines the rules and standards that GitHub Copilot should follow when generating code suggestions for this project (HRM API). Copilot should use these instructions to provide consistent, high-quality code suggestions that comply with project standards.
 
-## Genel Kurallar
-- **Dil:** Tüm kod önerileri Türkçe yorumlar ve dokümantasyon içermelidir (proje Türkçe dil desteği ile geliştirilmektedir).
-- **Kod Kalitesi:** Önerilen kodlar okunabilir, sürdürülebilir ve performanslı olmalıdır. Gereksiz karmaşıklık kaçınılmalıdır.
-- **Test Odaklı Geliştirme:** Her yeni fonksiyon veya sınıf için test önerisi sun. Mevcut test kalıplarını takip et (örneğin, TenantTestCaseMixin kullanımı).
-- **Hata Yönetimi:** Uygun exception handling öner. Proje spesifik exception'ları kullan (örneğin, BaseAPIException alt sınıfları).
-- **Dokümantasyon:** Fonksiyonlar ve sınıflar için docstring'ler ekle. API endpoint'leri için DRF'nin extend_schema dekoratörünü kullan.
-- **Güvenlik:** Hassas veriler (şifreler, token'lar) için uygun validasyon ve şifreleme öner.
-- **Performans:** Veritabanı sorgularında N+1 problemi önle. Select_related ve prefetch_related kullan.
+## General Rules
+- **Language:** All code suggestions should include English comments and documentation (the project is developed with English language support).
+- **Code Quality:** Suggested code should be readable, maintainable, and performant. Unnecessary complexity should be avoided.
+- **Test-Driven Development:** Provide test suggestions for every new function or class. Follow existing test patterns (e.g., use of TenantTestCaseMixin).
+- **Error Handling:** Suggest appropriate exception handling. Use project-specific exceptions (e.g., BaseAPIException subclasses).
+- **Documentation:** Add docstrings for functions and classes. Use DRF's extend_schema decorator for API endpoints.
+- **Security:** Suggest appropriate validation and encryption for sensitive data (passwords, tokens).
+- **Performance:** Prevent N+1 problems in database queries. Use select_related and prefetch_related.
 
-## Kodlama Standartları
-- **Formatlama:** Black (line-length: 88, target-version: py313) standartlarına uy. Tüm öneriler Black formatında olmalıdır.
-- **Import Sıralaması:** isort (profile: black) kurallarına göre:
-    - Standart kütüphane
+## Coding Standards
+- **Formatting:** Follow Black standards (line-length: 88, target-version: py313). All suggestions should be in Black format.
+- **Import Ordering:** According to isort (profile: black) rules:
+    - Standard library
     - Django
-    - Üçüncü parti
-    - İlk parti (auth, config, employees, tenants, users, utils)
-    - Yerel klasör
+    - Third-party
+    - First-party (auth, config, employees, tenants, users, utils)
+    - Local folder
 - **Naming Conventions:**
-    - Sınıflar: PascalCase
-    - Fonksiyonlar: snake_case
-    - Değişkenler: snake_case
-    - Sabitler: UPPER_CASE
-- **Line Length:** 88 karakteri aşma.
-- **Docstrings:** Google style docstrings kullan.
-- **Type Hints:** Mümkün olduğunca type hints ekle (Python 3.13+ uyumlu).
+    - Classes: PascalCase
+    - Functions: snake_case
+    - Variables: snake_case
+    - Constants: UPPER_CASE
+- **Line Length:** Do not exceed 88 characters.
+- **Docstrings:** Use Google style docstrings.
+- **Type Hints:** Add type hints whenever possible (Python 3.13+ compatible).
 
-## Teknoloji Stack ve Mimari
-- **Framework:** Django 5.2.7, DRF (djangorestframework), django-tenants (çok kiracılı mimari).
+## Technology Stack and Architecture
+- **Framework:** Django 5.2.7, DRF (djangorestframework), django-tenants (multi-tenant architecture).
 - **Authentication:** JWT (djangorestframework-simplejwt).
-- **Database:** PostgreSQL, çok kiracılı schema'lar.
+- **Database:** PostgreSQL, multi-tenant schemas.
 - **Asynchronous Tasks:** Celery + Redis.
-- **Email:** Django email backend, SendGrid entegrasyonu.
-- **Testing:** Django test framework, model-bakery, coverage (modül bazlı minimum %'ler: auth:85, tenants:80, users:75, employees:80, utils:90).
+- **Email:** Django email backend, SendGrid integration.
+- **Testing:** Django test framework, model-bakery, coverage (module-based minimum percentages: auth:85, tenants:80, users:75, employees:80, titles:95, utils:90).
 - **Deployment:** Docker, docker-compose.
-- **CI/CD:** GitHub Actions (formatting check, paralel modül testleri, coverage kontrolü).
+- **CI/CD:** GitHub Actions (formatting check, parallel module tests, coverage control).
 
-## Tenant-Aware Kodlama
-- Tüm modeller ve sorgular tenant context'inde çalışmalıdır. `tenant_context()` kullan.
-- Public schema (shared apps) ve tenant schema'ları (tenant apps) ayırımı yap.
-- Kullanıcı işlemleri için TenantUser modelini tercih et.
-- Domain routing için CustomTenantMiddleware kullan.
+## Tenant-Aware Coding
+- All models and queries should operate within tenant context. Use `tenant_context()`.
+- Distinguish between public schema (shared apps) and tenant schemas (tenant apps).
+- Prefer TenantUser model for user operations.
+- Use CustomTenantMiddleware for domain routing.
 
-## API Tasarımı
-- RESTful API prensipleri takip et.
-- Serializer'lar için ModelSerializer kullan.
-- Permission'lar: IsAuthenticated, IsMinimumManagerOrReadOnly gibi proje spesifik permission'lar.
-- Pagination: PageNumberPagination (page_size: 20).
-- Schema dokümantasyonu için drf-spectacular kullan.
+## API Design
+- Follow RESTful API principles.
+- Use ModelSerializer for serializers.
+- **Permissions:** IsAuthenticated, IsMinimumManagerOrReadOnly and other project-specific permissions.
+- **Pagination:** PageNumberPagination (page_size: 20).
+- Use drf-spectacular for schema documentation.
 
-## Örnek Kod Kalıpları
-Model Örneği
+## Code Pattern Examples
+
+### Model Example
 ```python
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -83,7 +84,7 @@ class Employee(BaseModel):
         return f"{self.first_name} {self.last_name}"
 ```
 
-View Örneği
+### View Example
 ```python
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -105,7 +106,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         )
 ```
 
-Test Örneği
+### Test Example
 ```python
 from django_tenants.test.cases import TenantTestCase
 from model_bakery import baker
@@ -126,7 +127,7 @@ class EmployeeServiceTestCase(TenantTestCaseMixin, TenantTestCase):
         self.assertEqual(employee.user, user)
 ```
 
-Service Örneği
+### Service Example
 ```python
 from utils.interfaces import BaseService
 
@@ -151,12 +152,12 @@ class EmployeeService(BaseService):
         instance.delete()
 ```
 
-## Yasaklar ve Kaçınılması Gerekenler
-- **Hardcoded Values:** Konfigürasyon değerlerini .env veya settings'den al.
-- **Global State:** Tenant context dışında global değişken kullanma.
-- **Raw SQL:** Mümkün olduğunca ORM kullan. Raw SQL zorunluysa açıklama ekle.
-- **Magic Numbers/Strings:** Sabitler olarak tanımla.
-- **Print Statements:** Logging kullan (Django logging).
-- **Direct Database Access:** Service layer üzerinden işlemleri yap.
-- **Blocking Operations:** Async task'lar için Celery kullan.
-- **Security Vulnerabilities:** SQL injection, XSS vb. riskler önle.
+## Prohibited Practices and Things to Avoid
+- **Hardcoded Values:** Get configuration values from .env or settings.
+- **Global State:** Do not use global variables outside tenant context.
+- **Raw SQL:** Use ORM whenever possible. If raw SQL is necessary, add explanation.
+- **Magic Numbers/Strings:** Define them as constants.
+- **Print Statements:** Use logging (Django logging).
+- **Direct Database Access:** Perform operations through service layer.
+- **Blocking Operations:** Use Celery for async tasks.
+- **Security Vulnerabilities:** Prevent risks such as SQL injection, XSS, etc.
