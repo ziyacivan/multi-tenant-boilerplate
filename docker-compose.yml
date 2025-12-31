@@ -1,0 +1,93 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hrm-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-hrm_db}
+      POSTGRES_USER: ${DB_USER:-hrm_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hrm_password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hrm_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrm-network
+
+  redis:
+    image: "redis:alpine"
+    container_name: hrm_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrm-network
+
+  web:
+    build: .
+    container_name: hrm-api
+    command: uv run python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - CONTAINER_TYPE=web
+    stdin_open: true
+    tty: true
+    networks:
+      - hrm-network
+
+  celery_worker:
+    build: .
+    container_name: hrm_celery_worker
+    command: uv run celery -A config worker -l info
+    entrypoint: ["/docker-entrypoint-celery.sh"]
+    volumes:
+      - .:/app
+    depends_on:
+      web:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - hrm-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
+
+networks:
+  hrm-network:
+    driver: bridge

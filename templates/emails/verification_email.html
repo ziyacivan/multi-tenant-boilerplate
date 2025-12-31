@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Email Doğrulama</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2>Email Adresinizi Doğrulayın</h2>
+        <p>Merhaba,</p>
+        <p>Hesabınızı oluşturduğunuz için teşekkür ederiz. Lütfen aşağıdaki doğrulama kodunu kullanarak email adresinizi doğrulayın:</p>
+        <div style="background-color: #f4f4f4; padding: 15px; margin: 20px 0; text-align: center;">
+            <h1 style="margin: 0; color: #007bff;">{{ verification_code }}</h1>
+        </div>
+        <p>Bu kod <strong>{{ expires_at|date:"d.m.Y H:i" }}</strong> tarihine kadar geçerlidir.</p>
+        <p>Eğer bu hesabı siz oluşturmadıysanız, bu e-postayı görmezden gelebilirsiniz.</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #666;">Bu otomatik bir e-postadır, lütfen yanıtlamayın.</p>
+    </div>
+</body>
+</html>
